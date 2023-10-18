@@ -361,3 +361,19 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Assets/Scenes
+/Assets/Settings
+/Assets/Source/T-34
+/Assets/Sprite
+/Assets/TutorialInfo
+/Library
+/ProjectSettings
+/Temp
+/UserSettings
+/.vsconfig
+/3D Multiplayer Tank Simulator.sln
+/Assembly-CSharp-Editor.csproj
+/Assembly-CSharp.csproj
+/Assets/New Terrain.asset
+/Assets/Readme.asset
+/Assets/UniversalRenderPipelineGlobalSettings.asset
