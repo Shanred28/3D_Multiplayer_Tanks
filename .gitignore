@@ -377,3 +377,9 @@ FodyWeavers.xsd
 /Assets/New Terrain.asset
 /Assets/Readme.asset
 /Assets/UniversalRenderPipelineGlobalSettings.asset
+/Assets/ProceduralTerrainPainter
+/Assets/Sound
+/Assets/Texture/Terrain
+/Assets/UnityTechnologies/ParticlePack
+/sc.terrain.painter.editor.csproj
+/sc.terrain.painter.runtime.csproj

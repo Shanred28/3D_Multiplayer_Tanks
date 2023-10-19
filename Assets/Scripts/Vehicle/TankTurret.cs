@@ -15,17 +15,45 @@ public class TankTurret : MonoBehaviour
     [SerializeField] private float _maxTopAngle;
     [SerializeField] private float _maxBottomAngle;
 
+    [Header("SFX")]
+    [SerializeField] private AudioSource _soundFire;
+    [SerializeField] private ParticleSystem _particleFireSFX;
+    [SerializeField] private float _forceRecoil;
+
     private TrackTank _tank;
     private float _maskCurretAngle;
+    private Rigidbody _rigidbodyTank;
     private void Start()
     {
         _tank = GetComponent<TrackTank>();
+        _rigidbodyTank = GetComponent<Rigidbody>();
         _maxTopAngle = -_maxTopAngle;
     }
 
     private void Update()
     {
         ControlTurretAim();
+
+        //Temp
+
+        if (Input.GetMouseButton(0))
+        {
+            Fire();
+        }
+
+    }
+
+    public void Fire()
+    {
+        FireSfx();
+    }
+
+    private void FireSfx()
+    {
+        _soundFire.Play();
+        _particleFireSFX.Play();
+
+        _rigidbodyTank.AddForceAtPosition(- _mask.forward * _forceRecoil, _mask.position, ForceMode.Impulse);
     }
 
     private void ControlTurretAim()

@@ -119,6 +119,9 @@ public class TrackTank : Vehicle
     [SerializeField] private float _minSidewayStiffnessInPlace;
     [SerializeField] private float _minSidewayStiffnessInMotion;
 
+    public float LeftWheelRpm => _leftWheelRow._minRpm;
+    public float LRightWheelRpm => _rightWheelRow._minRpm;
+
     private Rigidbody _rb;
     private float _currentMotorTorque;
 

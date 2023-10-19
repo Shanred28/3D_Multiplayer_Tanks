@@ -6,6 +6,7 @@ public class Vehicle : MonoBehaviour
 
     [Header("Engine Sound")]
     [SerializeField] private AudioSource _engineSound;
+    [SerializeField] private AudioSource _trackSound;
     [SerializeField] private float _enginePithModifier;
 
 
@@ -34,7 +35,6 @@ public class Vehicle : MonoBehaviour
 
     protected virtual void Update()
     {
-        if(isStartDrive == true)
            UpdateEngineSFX();
     }
 
@@ -43,7 +43,17 @@ public class Vehicle : MonoBehaviour
         if (_engineSound != null)
         {
             _engineSound.pitch = 1.0f + NormalizedLinearVelocity * _enginePithModifier;
-            _engineSound.volume = 0.5f + NormalizedLinearVelocity;
+            _engineSound.volume = 0.8f + NormalizedLinearVelocity;
+
+            if (LinearVelocity > 0.1f)
+            {
+                _trackSound.volume = 0.8f + NormalizedLinearVelocity;
+                _trackSound.pitch = 1.0f + NormalizedLinearVelocity * _enginePithModifier;
+            } 
+            else 
+            {
+                _trackSound.volume = 0.0f;
+            }
         }
     }
 
