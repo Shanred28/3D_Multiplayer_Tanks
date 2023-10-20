@@ -1,6 +1,7 @@
+using Mirror;
 using UnityEngine;
 
-public class Vehicle : MonoBehaviour
+public class Vehicle : Destructible
 {
     [SerializeField] protected float _maxLinearVelosity;
 
@@ -15,6 +16,28 @@ public class Vehicle : MonoBehaviour
     public Transform zoomOpticsPosition => _zoomOpticsPoint;
 
     public virtual float LinearVelocity => 0;
+
+    public Turret Turret;
+
+    [SyncVar]
+    private Vector3 _netAimPoint;
+    public Vector3 NetAimPoit
+    { 
+        get => _netAimPoint;
+
+        set
+        { 
+            _netAimPoint = value;
+            CmdSetNetAimPoint(value);
+        }
+    }
+
+
+    [Command]
+    private void CmdSetNetAimPoint(Vector3 v)
+    { 
+        _netAimPoint = v;
+    }
 
     public float NormalizedLinearVelocity
     {
@@ -38,6 +61,29 @@ public class Vehicle : MonoBehaviour
            UpdateEngineSFX();
     }
 
+    public void SetVisibile(bool visible)
+    {
+        if (visible == true)
+            SetLayerToAll("Default");
+        else
+            SetLayerToAll("Ignore Main Camera");
+    }
+
+    private void SetLayerToAll(string layerName)
+    { 
+        gameObject.layer = LayerMask.NameToLayer(layerName);
+
+        foreach (Transform t in transform.GetComponentsInChildren<Transform>()) 
+        { 
+            t.gameObject.layer = LayerMask.NameToLayer(layerName);
+        }
+    }
+
+    public void Fire()
+    {
+        Turret.Fire();
+    }
+
     private void UpdateEngineSFX()
     {
         if (_engineSound != null)
@@ -55,18 +101,5 @@ public class Vehicle : MonoBehaviour
                 _trackSound.volume = 0.0f;
             }
         }
-    }
-
-    private bool isStartDrive;
-    public virtual void OnStartDrive()
-    {
-        isStartDrive = true;
-        _engineSound.Play();
-    }
-
-    public virtual void OffStartDrive()
-    {
-        isStartDrive = false;
-        _engineSound.Stop();
     }
 }

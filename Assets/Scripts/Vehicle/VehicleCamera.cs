@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class VehicleCamera : MonoBehaviour
 {
+    public static VehicleCamera Instance;
+
     [SerializeField] private Vehicle _vehicle;
     [SerializeField] private Vector3 _offset;
 
@@ -35,7 +37,18 @@ public class VehicleCamera : MonoBehaviour
     private float _currentDistance;
     private float _lastDistance;
 
-    private bool isZoom;
+    private bool _isZoom;
+    public bool IsZoom => _isZoom;
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -44,16 +57,16 @@ public class VehicleCamera : MonoBehaviour
         _defaultFov = _camera.fieldOfView;
         _defaultMaxVerticalAngle = maxAngleLimitY;
 
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void Update()
     {
+        if (_vehicle == null) return;
+
         UpdateControl();
         _distance = Mathf.Clamp(_distance, _minDistance, _maxDistance);
 
-        isZoom = _distance <= _minDistance;
+        _isZoom = _distance <= _minDistance;
 
         _deltaRotationX += _rotateControl.x * _rotateSensetive;
         _deltaRotationY += _rotateControl.y * _rotateSensetive;
@@ -92,8 +105,8 @@ public class VehicleCamera : MonoBehaviour
         transform.position = AddLocalOffset(transform.position);
 
         //Zoom
-        _zoomMaskEffect.SetActive(isZoom);
-        if (isZoom == true)
+        _zoomMaskEffect.SetActive(_isZoom);
+        if (_isZoom == true)
         {
             transform.position = _vehicle.zoomOpticsPosition.position;
             _camera.fieldOfView = _zoomedFov;
@@ -113,9 +126,9 @@ public class VehicleCamera : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
         { 
-            isZoom = !isZoom;
+            _isZoom = !_isZoom;
 
-            if (isZoom == true)
+            if (_isZoom == true)
             {
                 _lastDistance = _distance;
                 _distance = _minDistance;
@@ -127,11 +140,6 @@ public class VehicleCamera : MonoBehaviour
             }
         }
     }
-
-/*    public void ScrollDistanceCamera(float distanse)
-    {
-        _distance = Mathf.Clamp(_distance + distanse * _scrollSensetive, _minDistance, _maxDistance);
-    }*/
 
     private Vector3 AddLocalOffset(Vector3 position)
     {

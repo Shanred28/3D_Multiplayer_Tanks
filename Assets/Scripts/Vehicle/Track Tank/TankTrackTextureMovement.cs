@@ -20,8 +20,8 @@ public class TankTrackTextureMovement : MonoBehaviour
        
         float speed = _trackTank.LeftWheelRpm / 60.0f * _modefeir * Time.fixedDeltaTime;
         _leftTrackRenderer.material.SetTextureOffset("_BaseMap", _leftTrackRenderer.material.GetTextureOffset("_BaseMap") + _direction * speed);
-        print(speed);
-        speed = _trackTank.LRightWheelRpm/ 60.0f * _modefeir * Time.fixedDeltaTime;
+
+        speed = _trackTank.RightWheelRpm/ 60.0f * _modefeir * Time.fixedDeltaTime;
         _rightTrackRenderer.material.SetTextureOffset("_BaseMap", _rightTrackRenderer.material.GetTextureOffset("_BaseMap") + _direction * speed);
     }
 }

@@ -1,3 +1,4 @@
+using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -87,7 +88,24 @@ public class TrackWheelRow
             _meshes[i].Rotate(angle,0,0);
         }
     }
+
+    public void UpdateMeshRotationByRpm(float rpm)
+    {
+        float angle = rpm * 360.0f / 60.0f * Time.fixedDeltaTime;
+
+        for (int i = 0; i < _meshes.Length; i++)
+        {
+            Vector3 position;
+            Quaternion rotation;
+
+            _colliders[i].GetWorldPose(out position, out rotation);
+
+            _meshes[i].position = position;
+            _meshes[i].Rotate(angle,0,0);
+        }
+    }
 }
+
 public class TrackTank : Vehicle
 {
     public override float LinearVelocity => _rb.velocity.magnitude;
@@ -120,7 +138,7 @@ public class TrackTank : Vehicle
     [SerializeField] private float _minSidewayStiffnessInMotion;
 
     public float LeftWheelRpm => _leftWheelRow._minRpm;
-    public float LRightWheelRpm => _rightWheelRow._minRpm;
+    public float RightWheelRpm => _rightWheelRow._minRpm;
 
     private Rigidbody _rb;
     private float _currentMotorTorque;
@@ -133,7 +151,39 @@ public class TrackTank : Vehicle
 
     private void FixedUpdate()
     {
-        float targetMotorTorque =  TargetInputControl.z > 0? _maxForwardTorque * Mathf.RoundToInt(TargetInputControl.z) : _maxBackwardMotorTorque * Mathf.RoundToInt(TargetInputControl.z);
+        if (isOwned == true)
+        {
+            UpdateMotorTorque();
+
+            CmdUpdateWheelRpm(LeftWheelRpm, RightWheelRpm);
+        }
+    }
+
+    [Command]
+    private void CmdUpdateWheelRpm(float leftRpm, float rightRpm)
+    {
+        SvUpdateWheelRpm(leftRpm,  rightRpm);
+    }
+
+    [Server]
+    private void SvUpdateWheelRpm(float leftRpm, float rightRpm)
+    {
+        RpcUpdateWheelRpm(leftRpm, rightRpm);
+    }
+
+    [ClientRpc(includeOwner = false)]
+    private void RpcUpdateWheelRpm(float leftRpm, float rightRpm)
+    { 
+        _leftWheelRow._minRpm = leftRpm;
+        _rightWheelRow._minRpm = rightRpm;
+
+        _leftWheelRow.UpdateMeshRotationByRpm(leftRpm);
+        _rightWheelRow.UpdateMeshRotationByRpm(rightRpm);
+    }
+
+    private void UpdateMotorTorque()
+    {
+        float targetMotorTorque = TargetInputControl.z > 0 ? _maxForwardTorque * Mathf.RoundToInt(TargetInputControl.z) : _maxBackwardMotorTorque * Mathf.RoundToInt(TargetInputControl.z);
         float breakTorque = _breakTorque * TargetInputControl.y;
         float steering = TargetInputControl.x;
 
@@ -240,3 +290,4 @@ public class TrackTank : Vehicle
         _rightWheelRow.UpdateMeshTransform();
     }
 }
+

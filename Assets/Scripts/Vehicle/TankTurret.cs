@@ -1,11 +1,8 @@
 using UnityEngine;
 
 
-public class TankTurret : MonoBehaviour
+public class TankTurret : Turret
 {
-    //TODO
-    [SerializeField] private Transform _aim;
-
     [SerializeField] private Transform _tower;
     [SerializeField] private Transform _mask;
 
@@ -30,21 +27,22 @@ public class TankTurret : MonoBehaviour
         _maxTopAngle = -_maxTopAngle;
     }
 
-    private void Update()
+    protected override void Update()
     {
+        base.Update();
+
         ControlTurretAim();
-
-        //Temp
-
-        if (Input.GetMouseButton(0))
-        {
-            Fire();
-        }
-
     }
 
-    public void Fire()
+    protected override void OnFire()
     {
+        base.OnFire();
+
+        GameObject projectile = Instantiate(ProjectilePref.gameObject);
+
+        projectile.transform.position = _launchPoint.position;
+        projectile.transform.forward = _launchPoint.forward;
+
         FireSfx();
     }
 
@@ -59,7 +57,7 @@ public class TankTurret : MonoBehaviour
     private void ControlTurretAim()
     {
         //Tower
-        Vector3 locPos = _tower.InverseTransformPoint(_aim.position);
+        Vector3 locPos = _tower.InverseTransformPoint(_tank.NetAimPoit);
         locPos.y = 0;
         Vector3 locPosGlob = _tower.TransformPoint(locPos);
         _tower.rotation = Quaternion.RotateTowards(_tower.rotation, Quaternion.LookRotation((locPosGlob - _tower.position).normalized, _tower.up), _horizontalRotationSpeed * Time.deltaTime);
@@ -68,7 +66,7 @@ public class TankTurret : MonoBehaviour
         //Mask
         _mask.localRotation = Quaternion.identity;
 
-        locPos = _mask.InverseTransformPoint(_aim.position);
+        locPos = _mask.InverseTransformPoint(_tank.NetAimPoit);
         locPos.x = 0;
         locPosGlob = _mask.TransformPoint(locPos);
 
