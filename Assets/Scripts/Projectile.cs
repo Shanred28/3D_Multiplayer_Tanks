@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
@@ -32,23 +33,25 @@ public class Projectile : MonoBehaviour
         RaycastHit hit;
 
         //Raycast hit effect
-        if (Physics.Raycast(transform.position, transform.forward, out hit, _velocity * Time.deltaTime * RAYADVANCE));
+        if (Physics.Raycast(transform.position, transform.forward, out hit, _velocity * Time.deltaTime * RAYADVANCE))
         { 
             transform.position = hit.point;
 
-            var destrictible = hit.transform.root.GetComponent<Destructible>();
-
-            if (destrictible)
+            /* var destrictible = hit.transform.root.GetComponent<Destructible>();*/
+            print(hit);
+            if (hit.transform.root.TryGetComponent(out Destructible destrictible))
             {
-                if (NetworkSessionManager.Instance.IsServer)
+                print("sdfds");
+                if (NetworkSessionManager.Instance.IsServer && destrictible != null)
                 {
                     float dmg = _damage + Random.Range(-_damageScatter, _damageScatter) * _damage;
 
-                    destrictible.SvApplyDamage((int)dmg);
+                    destrictible?.SvApplyDamage((int)dmg);
                 }
             }
 
             OnProjectileLifeEnd(hit.collider, hit.point,hit.normal);
+            return;
         }
 
         transform.position += step;

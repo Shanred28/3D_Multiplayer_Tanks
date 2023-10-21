@@ -10,7 +10,17 @@ public class NetworkSessionManager : NetworkManager
     public Vector3 RandomSpawnPintBlue => _spawnZoneBlue[Random.Range(0, _spawnZoneBlue.Length)].RandomInside;
 
     public static NetworkSessionManager Instance => singleton as NetworkSessionManager;
+    public static GameEventCollector Events => Instance._gameEventCollector;
 
     public bool IsServer => (mode == NetworkManagerMode.Host || mode == NetworkManagerMode.ServerOnly);
     public bool IsClient => (mode == NetworkManagerMode.Host || mode == NetworkManagerMode.ClientOnly);
+
+    [SerializeField] private GameEventCollector _gameEventCollector;
+
+    public override void OnServerAddPlayer(NetworkConnectionToClient conn)
+    {
+        base.OnServerAddPlayer(conn);
+
+        _gameEventCollector.SvOnAddPlayer();
+    }
 }

@@ -78,7 +78,7 @@ public class Turret : NetworkBehaviour
 
       _fireTimer = _fireRate;
 
-        RpcFire();
+        OnFire();
     }
 
     protected virtual void Update()

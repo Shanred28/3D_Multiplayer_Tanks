@@ -1,5 +1,6 @@
 using Mirror;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Player : NetworkBehaviour
 {
@@ -17,6 +18,8 @@ public class Player : NetworkBehaviour
     }
 
     private static int TeamIdCounter;
+
+    public UnityAction<Vehicle> VehicleSpawned;
 
     public Vehicle activeVehicle { get; set; }
 
@@ -140,6 +143,8 @@ public class Player : NetworkBehaviour
         {
             VehicleCamera.Instance.SetTarget(activeVehicle);
         }
+
+        VehicleSpawned?.Invoke(activeVehicle);
     }
     
 }

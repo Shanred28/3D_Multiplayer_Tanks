@@ -22,7 +22,7 @@ public class VehicleInputControl : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0))
             {
-                _player.activeVehicle.Fire();
+               _player.activeVehicle.Fire();
             }
         }      
     }

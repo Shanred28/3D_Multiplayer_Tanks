@@ -13,6 +13,8 @@ public class Destructible : NetworkBehaviour
     private int _currentHp;
     public int HitPoint => _currentHp;
 
+    [SerializeField] private UnityEvent _destroed;
+
     [SyncVar(hook = nameof(ChangeHitPoint))]
     private int _syncCurrentHP;
 
@@ -36,10 +38,22 @@ public class Destructible : NetworkBehaviour
                 GameObject sfx =  Instantiate(_destroySfx, transform.position, Quaternion.identity);
                 NetworkServer.Spawn(sfx);
             }
-
-            Destroy(gameObject);
+            _syncCurrentHP = 0;
+            RpcDestroy();
         }
     }
+
+    [ClientRpc]
+    private void RpcDestroy()
+    {
+        OnDestructibleDestroy();
+    }
+
+    protected virtual void OnDestructibleDestroy()
+    { 
+        _destroed?.Invoke();
+    }
+
 
     private void ChangeHitPoint(int oldValue, int newValue)
     {
