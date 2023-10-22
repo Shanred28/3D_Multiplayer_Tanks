@@ -20,28 +20,32 @@ public class TankTurret : Turret
     private TrackTank _tank;
     private float _maskCurretAngle;
     private Rigidbody _rigidbodyTank;
+
     private void Start()
     {
         _tank = GetComponent<TrackTank>();
         _rigidbodyTank = GetComponent<Rigidbody>();
         _maxTopAngle = -_maxTopAngle;
+        _currentSpreadShootRange = _minSpreadShootRange;
     }
 
     protected override void Update()
     {
         base.Update();
 
-        ControlTurretAim();
+        ControlTurretAim();   
     }
 
     protected override void OnFire()
     {
         base.OnFire();
 
-        GameObject projectile = Instantiate(ProjectilePref.gameObject);
+        GameObject projectile = Instantiate(ProjectilePrefA.gameObject);
 
         projectile.transform.position = _launchPoint.position;
-        projectile.transform.forward = _launchPoint.forward;
+        Vector3 offset = new Vector3(RandomRangeForSpreedShoot(_currentSpreadShootRange), RandomRangeForSpreedShoot(_currentSpreadShootRange), 0);
+      
+        projectile.transform.forward = _launchPoint.forward + offset;
 
         FireSfx();
     }
@@ -60,6 +64,14 @@ public class TankTurret : Turret
         Vector3 locPos = _tower.InverseTransformPoint(_tank.NetAimPoit);
         locPos.y = 0;
         Vector3 locPosGlob = _tower.TransformPoint(locPos);
+        if (_tower.rotation != Quaternion.LookRotation((locPosGlob - _tower.position).normalized, _tower.up))
+        {
+            _currentSpreadShootRange = Mathf.Lerp(_currentSpreadShootRange, _maxSpreadShootRange, Time.deltaTime);
+        }
+        else
+        {
+            _currentSpreadShootRange = Mathf.Lerp(_currentSpreadShootRange, _minSpreadShootRange, Time.deltaTime);
+        }
         _tower.rotation = Quaternion.RotateTowards(_tower.rotation, Quaternion.LookRotation((locPosGlob - _tower.position).normalized, _tower.up), _horizontalRotationSpeed * Time.deltaTime);
 
 
@@ -75,5 +87,10 @@ public class TankTurret : Turret
 
         _maskCurretAngle = Mathf.MoveTowards(_maskCurretAngle, targetAngle, _verticalRotationSpeed * Time.deltaTime);
         _mask.localRotation = Quaternion.Euler(_maskCurretAngle,0,0);
+    }
+
+    private float RandomRangeForSpreedShoot(float sdf)
+    {
+        return Random.Range(-sdf, sdf);
     }
 }

@@ -14,7 +14,7 @@ public class UIHealthText : MonoBehaviour
 
     private void OnDestroy()
     {
-        NetworkSessionManager.Events.PlayerVehicleSpawned -= OnPlayerVehicleSpawned;
+       // NetworkSessionManager.Events.PlayerVehicleSpawned -= OnPlayerVehicleSpawned;
         if (_destructible != null)
             _destructible.HitPointChange -= OnHitPointChange;
     }

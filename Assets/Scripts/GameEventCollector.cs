@@ -7,8 +7,8 @@ public class GameEventCollector : NetworkBehaviour
 
     [Server]
     public void SvOnAddPlayer()
-    { 
-    
+    {
+        RpcOnAddPlayer();
     }
 
     [ClientRpc]

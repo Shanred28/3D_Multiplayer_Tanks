@@ -24,6 +24,17 @@ public class VehicleInputControl : MonoBehaviour
             {
                _player.activeVehicle.Fire();
             }
+
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                _player.activeVehicle.SetTypeProjectile(0);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                _player.activeVehicle.SetTypeProjectile(1);
+            }
+
         }      
     }
 

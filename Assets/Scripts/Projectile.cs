@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
@@ -31,17 +30,14 @@ public class Projectile : MonoBehaviour
 
         Vector3 step = transform.forward * _velocity * Time.deltaTime;
         RaycastHit hit;
-
+       // Vector3 offset = Random.insideUnitSphere * _spreadShootRange;
         //Raycast hit effect
         if (Physics.Raycast(transform.position, transform.forward, out hit, _velocity * Time.deltaTime * RAYADVANCE))
         { 
             transform.position = hit.point;
 
-            /* var destrictible = hit.transform.root.GetComponent<Destructible>();*/
-            print(hit);
             if (hit.transform.root.TryGetComponent(out Destructible destrictible))
             {
-                print("sdfds");
                 if (NetworkSessionManager.Instance.IsServer && destrictible != null)
                 {
                     float dmg = _damage + Random.Range(-_damageScatter, _damageScatter) * _damage;
@@ -53,6 +49,9 @@ public class Projectile : MonoBehaviour
             OnProjectileLifeEnd(hit.collider, hit.point,hit.normal);
             return;
         }
+       
+        //offset = offset * Vector3.Distance(firePoint.position, pos) * _spreadShootDistanceFactor;
+
 
         transform.position += step;
     }
