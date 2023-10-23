@@ -1,3 +1,4 @@
+using Mirror;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
@@ -13,7 +14,10 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float _damageScatter;
     [SerializeField] private float _impactForce;
 
+    public NetworkIdentity Owner { get; set; }
+
     private const float RAYADVANCE = 1.1f;
+
     private void Start()
     {
         Destroy(gameObject, _lifeTime);
@@ -38,11 +42,24 @@ public class Projectile : MonoBehaviour
 
             if (hit.transform.root.TryGetComponent(out Destructible destrictible))
             {
-                if (NetworkSessionManager.Instance.IsServer && destrictible != null)
+                if (NetworkSessionManager.Instance.IsServer)
                 {
                     float dmg = _damage + Random.Range(-_damageScatter, _damageScatter) * _damage;
 
                     destrictible?.SvApplyDamage((int)dmg);
+
+                    if (destrictible.HitPoint <= 0)
+                    {
+                        if (Owner != null)
+                        { 
+                            Player player = Owner.GetComponent<Player>();
+
+                            if (player != null)
+                            {
+                                player.Frags++;
+                            }
+                        }
+                    }
                 }
             }
 

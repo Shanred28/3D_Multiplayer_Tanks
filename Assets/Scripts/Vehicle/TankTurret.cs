@@ -40,11 +40,12 @@ public class TankTurret : Turret
     {
         base.OnFire();
 
-        GameObject projectile = Instantiate(ProjectilePrefA.gameObject);
+        Projectile projectile = Instantiate(ProjectilePrefA);
 
         projectile.transform.position = _launchPoint.position;
         Vector3 offset = new Vector3(RandomRangeForSpreedShoot(_currentSpreadShootRange), RandomRangeForSpreedShoot(_currentSpreadShootRange), 0);
-      
+        projectile.Owner = _tank.Owner;
+
         projectile.transform.forward = _launchPoint.forward + offset;
 
         FireSfx();
