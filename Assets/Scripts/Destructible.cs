@@ -13,7 +13,8 @@ public class Destructible : NetworkBehaviour
     private int _currentHp;
     public int HitPoint => _currentHp;
 
-    [SerializeField] private UnityEvent _destroed;
+    [SerializeField] private UnityEvent<Destructible> _destroed;
+    public UnityEvent<Destructible> OnEventDeadth => _destroed;
 
     [SyncVar(hook = nameof(ChangeHitPoint))]
     private int _syncCurrentHP;
@@ -51,7 +52,7 @@ public class Destructible : NetworkBehaviour
 
     protected virtual void OnDestructibleDestroy()
     { 
-        _destroed?.Invoke();
+        _destroed?.Invoke(this);
     }
 
 

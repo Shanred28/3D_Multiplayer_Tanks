@@ -23,7 +23,8 @@ public class Player : NetworkBehaviour
 
     public Vehicle activeVehicle { get; set; }
 
-    [SerializeField] private Vehicle[] _vehiclePrefs;
+    [SerializeField] private Vehicle _vehiclePrefs;
+    [SerializeField] private VehicleInputControl _vehicleInputControl;
 
     [Header("Player")]
     [SyncVar(hook = nameof(OnNicknameChanged))]
@@ -66,6 +67,16 @@ public class Player : NetworkBehaviour
         if (isOwned == true)
         {
             CmdSetName(NetworkSessionManager.Instance.GetComponent<NetworkManagerHUD>().PlayerNickname);
+            NetworkSessionManager.Match.MatchEnd += OnMatchEnd;
+        }
+    }
+
+    public override void OnStopClient()
+    {
+        base.OnStopClient();
+        if (isOwned)
+        {
+            NetworkSessionManager.Match.MatchEnd -= OnMatchEnd;
         }
     }
 
@@ -84,21 +95,7 @@ public class Player : NetworkBehaviour
         {
             if (Input.GetKeyDown(KeyCode.F9))
             {
-                foreach (var p in FindObjectsOfType<Player>())
-                {
-                    if (p.activeVehicle != null)
-                    {
-                        NetworkServer.UnSpawn(p.activeVehicle.gameObject);
-                        Destroy(p.activeVehicle.gameObject);
-
-                        p.activeVehicle = null;
-                    }
-                }
-
-                foreach (var p in FindObjectsOfType<Player>())
-                {
-                    p.SvSpawnClientVeehicle();
-                }
+                    NetworkSessionManager.Match.SvRestartMatch();
             }
         }
 
@@ -119,7 +116,7 @@ public class Player : NetworkBehaviour
     {
         if (activeVehicle != null) return;
 
-        GameObject playerVehicle = Instantiate(_vehiclePrefs[Random.Range(0, _vehiclePrefs.Length)].gameObject, transform.position, Quaternion.identity);
+        GameObject playerVehicle = Instantiate(_vehiclePrefs.gameObject);
         playerVehicle.transform.position = _teamId % 2 == 0 ?
             NetworkSessionManager.Instance.RandomSpawnPointRed : NetworkSessionManager.Instance.RandomSpawnPintBlue;
 
@@ -145,6 +142,15 @@ public class Player : NetworkBehaviour
         }
 
         VehicleSpawned?.Invoke(activeVehicle);
+        _vehicleInputControl.enabled = true;
     }
-    
+
+    private void OnMatchEnd()
+    {
+        if (activeVehicle != null)
+        {
+            activeVehicle.SetTargetControl(Vector3.zero);
+            _vehicleInputControl.enabled = false;
+        }
+    }
 }

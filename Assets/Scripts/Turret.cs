@@ -38,7 +38,13 @@ public class Turret : NetworkBehaviour
     [Server]
     public void SvAddAmmo(int count, int type)
     {
-        _ammoCountA += count;
+        if (type == 0)
+        {
+            _ammoCountA += count;
+        }
+        else
+             _ammoCountB += count;
+
         RpcAmmoChanged(type);
     }
 
@@ -67,16 +73,6 @@ public class Turret : NetworkBehaviour
         }
 
         return false;
-        /*        if(_ammoCountA == 0 || _ammoCountB == 0) return false;
-
-                if (_ammoCountA >= count || _ammoCountB >= count)
-                { 
-                    _ammoCountA -= count;
-                    RpcAmmoChanged();
-                    return true;
-                }
-
-                return false;*/
     }
 
     [ClientRpc]
