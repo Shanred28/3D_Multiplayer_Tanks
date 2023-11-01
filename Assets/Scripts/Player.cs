@@ -140,7 +140,6 @@ public class Player : NetworkBehaviour
         }
     }
 
-
     private void Update()
     {
         if (isLocalPlayer == true)
@@ -195,6 +194,7 @@ public class Player : NetworkBehaviour
         if (vehicle == null) return;
 
         activeVehicle = vehicle.GetComponent<Vehicle>();
+        activeVehicle.Owner = netIdentity;
 
         if (activeVehicle != null && activeVehicle.isOwned && VehicleCamera.Instance != null)
         {

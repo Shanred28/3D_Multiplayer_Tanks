@@ -401,3 +401,8 @@ FodyWeavers.xsd
 /Unity.Mirror.CodeGen.csproj
 /Assets/Source/T-34_destroy
 /Assets/Material
+/Assets/Abandoned buildings
+/Assets/JP Environmental Asset Pack
+/Assets/RTP Vol.1
+/Assets/TerrainSampleAssets
+*.asset

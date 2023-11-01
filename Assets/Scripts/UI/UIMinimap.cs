@@ -22,6 +22,7 @@ public class UIMinimap : MonoBehaviour
 
         for (int i = 0; i < _tankMarks.Length; i++)
         {
+            if (_players[i] == null) continue;
             Vector3 normalPos = _sizeMap.GetNormPos(_players[i].activeVehicle.transform.position);
 
             Vector3 posInMinimap = new Vector3(normalPos.x * _background.rectTransform.sizeDelta.x * 0.5f, 
