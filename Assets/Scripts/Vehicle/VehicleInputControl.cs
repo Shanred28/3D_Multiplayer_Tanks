@@ -27,12 +27,17 @@ public class VehicleInputControl : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                _player.activeVehicle.SetTypeProjectile(0);
+                _player.activeVehicle.Turret.SetSelectProjectile(0);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha2))
             {
-                _player.activeVehicle.SetTypeProjectile(1);
+                _player.activeVehicle.Turret.SetSelectProjectile(1);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                _player.activeVehicle.Turret.SetSelectProjectile(2);
             }
 
         }      

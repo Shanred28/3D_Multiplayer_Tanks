@@ -20,7 +20,7 @@ public class ConditionTeamDeathmath : MonoBehaviour, IMatchCondition
         {
             if (v.activeVehicle != null)
             {
-                v.activeVehicle.OnEventDeadth.AddListener( EventDeeathHandler);
+                v.activeVehicle.Destroyed += OnVehicleDestroyed; 
                 if (v.TeamId == TeamSide.TeamRed)
                     _red++;
                 else if(v.TeamId == TeamSide.TeamBlue)
@@ -34,9 +34,12 @@ public class ConditionTeamDeathmath : MonoBehaviour, IMatchCondition
         
     }
 
-    private void EventDeeathHandler(Destructible des)
-    { 
-        var ownerPlayer = des.Owner?.GetComponent<Player>();
+    private void OnVehicleDestroyed(Destructible dest)
+    {
+        Vehicle v = (dest as Vehicle);
+        if (v == null) return;
+
+        Player ownerPlayer = v.Owner.GetComponent<Player>();
 
         if (ownerPlayer == null) return;
 

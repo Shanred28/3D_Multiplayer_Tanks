@@ -15,7 +15,7 @@ public class UIHealthSlider : MonoBehaviour
     {
         _destructible = destructible;
 
-        _destructible.HitPointChange += OnHitPointChange;
+        _destructible.HitPointChanged += OnHitPointChange;
         _slider.maxValue = _destructible.MaxHitPoint;
         _slider.value = _slider.maxValue;
 
@@ -31,7 +31,7 @@ public class UIHealthSlider : MonoBehaviour
     {
         if (_destructible == null) return;
 
-        _destructible.HitPointChange -= OnHitPointChange;
+        _destructible.HitPointChanged -= OnHitPointChange;
     }
 
     private void SetLocalColor()

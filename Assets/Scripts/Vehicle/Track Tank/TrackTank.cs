@@ -149,6 +149,12 @@ public class TrackTank : Vehicle
     {
         _rb = GetComponent<Rigidbody>();
         _rb.centerOfMass = _ceenterOfMass.localPosition;
+        Destroyed += OnTrackTankDestroyed;
+    }
+
+    private void OnDestroy()
+    {
+        Destroyed -= OnTrackTankDestroyed;
     }
 
     private void FixedUpdate()
@@ -161,14 +167,12 @@ public class TrackTank : Vehicle
         }
     }
 
-    protected override void OnDestructibleDestroy()
+    private void OnTrackTankDestroyed(Destructible arg0)
     {
-        base.OnDestructibleDestroy();
-
         GameObject ruinedVisualModel = Instantiate(_destroedPref);
 
-        ruinedVisualModel.transform.position = _visualModel.transform.position; 
-        ruinedVisualModel.transform.rotation = _visualModel.transform.rotation; 
+        ruinedVisualModel.transform.position = _visualModel.transform.position;
+        ruinedVisualModel.transform.rotation = _visualModel.transform.rotation;
     }
 
     [Command]

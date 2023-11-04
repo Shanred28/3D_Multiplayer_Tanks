@@ -18,7 +18,6 @@ public class Vehicle : Destructible
     public virtual float LinearVelocity => 0;
 
     public Turret Turret;
-    private int _typeProjectile;
 
     [SyncVar]
     private Vector3 _netAimPoint;
@@ -82,14 +81,9 @@ public class Vehicle : Destructible
 
     public void Fire()
     {
-        Turret.Fire(_typeProjectile);
+        Turret.Fire();
     }
 
-    public void SetTypeProjectile(int type)
-    {
-        _typeProjectile = type;
-        Turret.Reloded();
-    }
 
     private void UpdateEngineSFX()
     {
@@ -108,5 +102,13 @@ public class Vehicle : Destructible
                 _trackSound.volume = 0.0f;
             }
         }
+    }
+
+    [SyncVar(hook = "T")]
+    public NetworkIdentity Owner;
+
+    private void T(NetworkIdentity oldValue, NetworkIdentity newValue)
+    {
+
     }
 }

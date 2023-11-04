@@ -25,7 +25,7 @@ public class TeamBase : MonoBehaviour
 
         if(v.Owner.GetComponent<Player>().TeamId == _teamId) return;
 
-        v.HitPointChange += OnHitPointChange;
+        v.HitPointChanged += OnHitPointChange;
 
         _allVehicles.Add(v);
     }
@@ -37,7 +37,7 @@ public class TeamBase : MonoBehaviour
         if (v == null) return;
 
 
-        v.HitPointChange -= OnHitPointChange;
+        v.HitPointChanged -= OnHitPointChange;
         _allVehicles.Remove(v);
     }
 
@@ -73,7 +73,7 @@ public class TeamBase : MonoBehaviour
         {
             for (int i = 0; i < _allVehicles.Count; i++)
             {
-                _allVehicles[i].HitPointChange -= OnHitPointChange;
+                _allVehicles[i].HitPointChanged -= OnHitPointChange;
             }
         }
 

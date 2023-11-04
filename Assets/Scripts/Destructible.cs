@@ -4,20 +4,23 @@ using UnityEngine.Events;
 
 public class Destructible : NetworkBehaviour
 {
-    public UnityAction<int> HitPointChange;
+    public event UnityAction<int> HitPointChanged;
+    public event UnityAction<Destructible> Destroyed;
+    public event UnityAction<Destructible> Recovered;
 
     [SerializeField] private int _maxHitPoint;
     public int MaxHitPoint => _maxHitPoint;
-    [SerializeField] private GameObject _destroySfx;
+
+    [SerializeField] private UnityEvent _eventDestroyed;
+    [SerializeField] private UnityEvent _eventRecovered;
 
     private int _currentHp;
     public int HitPoint => _currentHp;
-
-    [SerializeField] private UnityEvent<Destructible> _destroed;
-    public UnityEvent<Destructible> OnEventDeadth => _destroed;
-
-    [SyncVar(hook = nameof(ChangeHitPoint))]
+   
+    [SyncVar(hook = nameof(SyncHitPoint))]
     private int _syncCurrentHP;
+
+    #region Server
 
     public override void OnStartServer()
     {
@@ -34,39 +37,44 @@ public class Destructible : NetworkBehaviour
 
         if (_syncCurrentHP <= 0)
         {
-            if (_destroySfx != null)
-            {
-                GameObject sfx =  Instantiate(_destroySfx, transform.position, Quaternion.identity);
-                NetworkServer.Spawn(sfx);
-            }
             _syncCurrentHP = 0;
             RpcDestroy();
         }
     }
 
+    [Server]
+    protected void SvRecovery()
+    {
+        _syncCurrentHP = _maxHitPoint;
+        _currentHp = _maxHitPoint;
+
+        RpcRecovery();
+    }
+
+    #endregion
+
+
+    #region Client
+
+     private void SyncHitPoint(int oldValue, int newValue)
+     {
+        _currentHp = newValue;
+        HitPointChanged?.Invoke(newValue);
+     }
+
     [ClientRpc]
     private void RpcDestroy()
     {
-        OnDestructibleDestroy();
+       Destroyed?.Invoke(this);
+        _eventDestroyed?.Invoke();
     }
 
-    protected virtual void OnDestructibleDestroy()
+    [ClientRpc]
+    private void RpcRecovery()
     { 
-        _destroed?.Invoke(this);
+      Recovered?.Invoke(this);
+        _eventRecovered?.Invoke();
     }
 
-
-    private void ChangeHitPoint(int oldValue, int newValue)
-    {
-        _currentHp = newValue;
-        HitPointChange?.Invoke(newValue);
-    }
-
-    [SyncVar(hook = "T")]
-    public NetworkIdentity Owner;
-
-    private void T(NetworkIdentity oldValue, NetworkIdentity newValue )
-    { 
-    
-    }
+    #endregion
 }
