@@ -36,11 +36,11 @@ public class Player : NetworkBehaviour
 {
     public static Player Local
     {
-        get 
+        get
         {
             var x = NetworkClient.localPlayer;
 
-            if(x != null)
+            if (x != null)
                 return x.GetComponent<Player>();
 
             return null;
@@ -50,8 +50,8 @@ public class Player : NetworkBehaviour
     private static int TeamIdCounter;
     public static UnityAction<int, int> ChangeFrags;
 
-    public UnityAction<Vehicle> VehicleSpawned;
-
+    public event UnityAction<Vehicle> VehicleSpawned;
+    public event UnityAction<ProjectileHitResult> ProjectileHit;
     public Vehicle activeVehicle { get; set; }
 
     [SerializeField] private Vehicle _vehiclePrefs;
@@ -67,11 +67,29 @@ public class Player : NetworkBehaviour
     {
         get { return _frags; }
 
-        set 
-        { 
+        set
+        {
             _frags = value;
-            ChangeFrags?.Invoke((int) netId, _frags);
+            ChangeFrags?.Invoke((int)netId, _frags);
         }
+    }
+
+    [Server]
+    public void SvInvokeProjectileHit(ProjectileHitResult hitResult)
+    {
+        ProjectileHit?.Invoke(hitResult);
+        RpcInvokeProjectileHit(hitResult.type, hitResult.damage, hitResult.point);
+    }
+
+    [ClientRpc]
+    public void RpcInvokeProjectileHit(ProjectileHitType type, float damage, Vector3 hitPoint)
+    {
+        ProjectileHitResult hitResult = new ProjectileHitResult();
+        hitResult.damage = damage;
+        hitResult.type = type;
+        hitResult.point = hitPoint;
+
+        ProjectileHit?.Invoke(hitResult);
     }
 
     [SyncVar]
@@ -104,7 +122,7 @@ public class Player : NetworkBehaviour
         base.OnStartServer();
 
         _teamId = TeamIdCounter % 2;
-        TeamIdCounter++;
+        TeamIdCounter++;       
     }
 
     public override void OnStopServer()
@@ -128,6 +146,9 @@ public class Player : NetworkBehaviour
             CmdAddPlayer(PlayerData);
 
             CmdUpdateData(_playerData);
+
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
         }
     }
 
@@ -137,6 +158,8 @@ public class Player : NetworkBehaviour
         if (isOwned)
         {
             NetworkSessionManager.Match.MatchEnd -= OnMatchEnd;
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
         }
     }
 

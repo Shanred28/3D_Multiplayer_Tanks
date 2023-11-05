@@ -5,7 +5,7 @@ public class Projectile : MonoBehaviour
 {
     [SerializeField] private ProjectileProperties _properties;
     [SerializeField] private ProjectileMovement _movement;
-    [SerializeField] private ProjeectileHit _hit;
+    [SerializeField] private ProjectileHit _hit;
 
     [Space(5)]
     [SerializeField] private GameObject _visualModel;
@@ -35,25 +35,32 @@ public class Projectile : MonoBehaviour
     {
         transform.position = _hit.RaycastHit.point;
 
-        if (NetworkSessionManager.Instance.IsServer == true && _hit.Destructible != null)
+        if (NetworkSessionManager.Instance.IsServer == true)
         {
-            SvTakeDamage();
+            ProjectileHitResult hitResult = _hit.GetHitResult();
 
-            SvAddFrags();
+            if (hitResult.type == ProjectileHitType.Penetration)
+            {
+                SvTakeDamage(hitResult);
+
+                SvAddFrags();
+            }
+
+            Owner.GetComponent<Player>().SvInvokeProjectileHit(hitResult);
         }
-
+       
         Destroy();
     }
 
-    private void SvTakeDamage()
+    private void SvTakeDamage(ProjectileHitResult hitResult)
     {
         float damage = _properties.Damage;
-        _hit.Destructible.SvApplyDamage((int) damage);
+        _hit.HitArmor.Destructible.SvApplyDamage((int)hitResult.damage);
     }
 
     private void SvAddFrags()
     {
-        if (_hit.Destructible.HitPoint <= 0)
+        if (_hit.HitArmor.Destructible.HitPoint <= 0)
         {
             if (Owner != null)
             {

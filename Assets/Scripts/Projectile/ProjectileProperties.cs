@@ -26,6 +26,18 @@ public class ProjectileProperties : ScriptableObject
     [Range(0.0f, 1.0f)]
     [SerializeField] private float _damageSpred;
 
+    [Header("Caliber")]
+    [SerializeField] private float _caliber;
+
+    [Header("Armor Penetration")]
+    [SerializeField] private float _armorPenetration;
+    [Range(0.0f, 1.0f)]
+    [SerializeField] private float _armorPenetrationSpread;
+    [Range(0.0f, 90.0f)]
+    [SerializeField] private float _normalizationAngle;
+    [Range(0.0f, 90.0f)]
+    [SerializeField] private float _ricochetAngle;
+
     public ProjectileType Type => _type;
 
     public Projectile ProjectilePref => _projectilePref;
@@ -36,9 +48,20 @@ public class ProjectileProperties : ScriptableObject
 
     public float Damage => _damage;
     public float DamageSpred => _damageSpred;
+    public float Caliber => _caliber;
+
+    public float ArmorPenetration => _armorPenetration;
+    public float ArmorPenetrationSpread => _armorPenetrationSpread;
+    public float NormalizationAngle => _normalizationAngle;
+    public float RicochetAngle => _ricochetAngle;
 
     public float GetSpreadDamage()
-    { 
-        return _damage * Random.Range(1 - _damageSpred,1 + _damageSpred);
+    {
+        return _damage * Random.Range(1 - _damageSpred, 1 + _damageSpred);
+    }
+
+    public float GetSpreadArmorPenetration()
+    {
+        return _armorPenetration * Random.Range(1 - _armorPenetrationSpread, 1 + _armorPenetrationSpread);
     }
 }
