@@ -24,7 +24,7 @@ public class UIHitResultPanel : MonoBehaviour
 
     private void OnProjectileHit(ProjectileHitResult hitResult)
     {
-        if (hitResult.type == ProjectileHitType.Enviroment) return;
+        if (hitResult.type == ProjectileHitType.Enviroment || hitResult.type == ProjectileHitType.ModuleNoPenetration) return;
 
         UIHitResultPopUp hitPopUp = Instantiate(hitResultPopUpPrefab);
         hitPopUp.transform.SetParent(_panelVehicle);
@@ -40,6 +40,9 @@ public class UIHitResultPanel : MonoBehaviour
 
         if (hitResult.type == ProjectileHitType.NoPenetration)
             hitPopUp.SetTypeResult("Броня не пробита!");
+
+        if(hitResult.type == ProjectileHitType.ModulePenetration)
+            hitPopUp.SetTypeResult("Пробитие модуля!");
 
         hitPopUp.SetDamageResult(hitResult.damage);
     }
