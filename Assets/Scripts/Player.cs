@@ -207,6 +207,7 @@ public class Player : NetworkBehaviour
 
         activeVehicle = playerVehicle.GetComponent<Vehicle>();        
         activeVehicle.Owner = netIdentity;
+        activeVehicle.TeamId = _teamId;
 
         RpcSetVehicle(activeVehicle.netIdentity);
     }
@@ -218,6 +219,7 @@ public class Player : NetworkBehaviour
 
         activeVehicle = vehicle.GetComponent<Vehicle>();
         activeVehicle.Owner = netIdentity;
+        activeVehicle.TeamId = _teamId;
 
         if (activeVehicle != null && activeVehicle.isOwned && VehicleCamera.Instance != null)
         {

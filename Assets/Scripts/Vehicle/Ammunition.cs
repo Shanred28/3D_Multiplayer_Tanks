@@ -9,7 +9,7 @@ public class Ammunition : NetworkBehaviour
     [SerializeField] private ProjectileProperties _projectileProperties;
 
     [SyncVar(hook = nameof(SyncAmmoCount))]
-    [SerializeField] protected int _syncAmmoCount;
+    [SerializeField] private int _syncAmmoCount;
 
     public ProjectileProperties ProjectileProp => _projectileProperties;
     public int AmmoCount => _syncAmmoCount;

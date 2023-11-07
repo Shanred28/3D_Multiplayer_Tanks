@@ -18,6 +18,7 @@ public class Vehicle : Destructible
     public virtual float LinearVelocity => 0;
 
     public Turret Turret;
+    public int TeamId;
 
     [SyncVar]
     private Vector3 _netAimPoint;

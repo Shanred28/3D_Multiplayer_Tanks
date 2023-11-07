@@ -7,7 +7,7 @@ public class UITankInfoCollector : MonoBehaviour
     [SerializeField] private UITankInfo _tankInfoPref;
 
     private UITankInfo[] _tanksInfo;
-    private List<Player> _playersWithoutLocal;
+    private List<Vehicle> _playersWithoutLocal;
 
     private void Start()
     {
@@ -41,15 +41,15 @@ public class UITankInfoCollector : MonoBehaviour
 
     private void OnMatchStart()
     {
-        Player[] players = FindObjectsOfType<Player>();
+        Vehicle[] vehicles = FindObjectsOfType<Vehicle>();
 
-        _playersWithoutLocal = new List<Player>(players.Length - 1);
+        _playersWithoutLocal = new List<Vehicle>(vehicles.Length - 1);
 
-        for (int i = 0; i < players.Length; i++)
+        for (int i = 0; i < vehicles.Length; i++)
         {
-            if (players[i] == Player.Local) continue;
+            if (vehicles[i] == Player.Local.activeVehicle) continue;
 
-            _playersWithoutLocal.Add(players[i]);
+            _playersWithoutLocal.Add(vehicles[i]);
         }
 
         _tanksInfo = new UITankInfo[_playersWithoutLocal.Count];
@@ -58,7 +58,7 @@ public class UITankInfoCollector : MonoBehaviour
         {
             _tanksInfo[i] = Instantiate(_tankInfoPref);
 
-            _tanksInfo[i].SetTank(_playersWithoutLocal[i].activeVehicle);
+            _tanksInfo[i].SetTank(_playersWithoutLocal[i]);
             _tanksInfo[i].transform.SetParent(_tankInfoPanel);
         }
     }

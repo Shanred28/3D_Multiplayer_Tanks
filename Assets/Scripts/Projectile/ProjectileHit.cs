@@ -57,6 +57,8 @@ public class ProjectileHit : MonoBehaviour
     {
         ProjectileHitResult hitResult = new ProjectileHitResult();
 
+        hitResult.damage = 0;
+
         if (_hitArmor == null)
         {
             hitResult.type = ProjectileHitType.Enviroment;
@@ -84,16 +86,28 @@ public class ProjectileHit : MonoBehaviour
             hitResult.type = ProjectileHitType.Ricochet;
 
         else if (projectilePenetration >= reducedArmor)
+        {
             hitResult.type = ProjectileHitType.Penetration;
-
+            hitResult.damage = _projectile.Properties.GetSpreadDamage();
+        }
             
-        else if(projectilePenetration < reducedArmor)
-            hitResult.type = ProjectileHitType.NoPenetration;
 
+
+        else if (projectilePenetration < reducedArmor)
+        {
+            hitResult.type = ProjectileHitType.NoPenetration;
+            if (_projectile.Properties.Type == ProjectileType.HightExplosive)
+            { 
+                float dmg = _projectile.Properties.GetSpreadDamage();
+                hitResult.damage = dmg / 2;
+            }
+
+        }
+/*            
         if(hitResult.type == ProjectileHitType.Penetration)
             hitResult.damage = _projectile.Properties.GetSpreadDamage();
         else
-            hitResult.damage = 0;
+            hitResult.damage = 0;*/
 
         if (_hitArmor.Type == ArmorType.Module)
         {

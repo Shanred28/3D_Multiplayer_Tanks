@@ -1,10 +1,18 @@
-using UnityEngine;
 using Mirror;
-using System;
+using UnityEngine;
+using UnityEngine.Events;
+
+public enum TypeModule
+{ 
+    LeftTrack,
+    RightTrack
+}
 
 [RequireComponent(typeof(TrackTank))]
 public class TrackModule : NetworkBehaviour
 {
+    public event UnityAction<VehicleModule, TypeModule> DesotroyerModule;
+
     [Header("Visual")]
     [SerializeField] private GameObject _leftTrackMesh;
     [SerializeField] private GameObject _leftTrackRuinedMesh;
@@ -21,8 +29,8 @@ public class TrackModule : NetworkBehaviour
     {
         _trackTank = GetComponent<TrackTank>();
 
-        _leftTrack.Destroyed += OnLeftTrackDestroed;
-        _rightTrack.Destroyed += OnRightTrackDestroed;
+        _leftTrack.Destroyed += OnLeftTrackDestroyed;
+        _rightTrack.Destroyed += OnRightTrackDestroyed;
 
         _leftTrack.Recovered += OnLeftTrackRecovered;
         _rightTrack.Recovered += OnRightTrackRecovered;
@@ -30,16 +38,18 @@ public class TrackModule : NetworkBehaviour
 
     private void OnDestroy()
     {
-        _leftTrack.Destroyed -= OnLeftTrackDestroed;
-        _rightTrack.Destroyed -= OnRightTrackDestroed;
+        _leftTrack.Destroyed -= OnLeftTrackDestroyed;
+        _rightTrack.Destroyed -= OnRightTrackDestroyed;
 
         _leftTrack.Recovered -= OnLeftTrackRecovered;
         _leftTrack.Recovered -= OnRightTrackRecovered;
     }
 
-    private void OnLeftTrackDestroed(Destructible arg0)
+    private void OnLeftTrackDestroyed(Destructible arg0)
     {
         ChangeActiveObjects(_leftTrackMesh, _leftTrackRuinedMesh);
+        if(isOwned)
+          DesotroyerModule?.Invoke(_leftTrack, TypeModule.LeftTrack);
         TakeAwayMibility();
     }
 
@@ -51,9 +61,11 @@ public class TrackModule : NetworkBehaviour
             RegainMibility();
     }
 
-    private void OnRightTrackDestroed(Destructible arg0)
+    private void OnRightTrackDestroyed(Destructible arg0)
     {
         ChangeActiveObjects(_rightTrackMesh, _rightTrackRuinedMesh);
+        if (isOwned)
+            DesotroyerModule?.Invoke(_rightTrack, TypeModule.RightTrack);
         TakeAwayMibility();
     }
 

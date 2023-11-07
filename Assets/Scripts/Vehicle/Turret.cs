@@ -10,7 +10,7 @@ public class Turret : NetworkBehaviour
     public Transform LaunchPoint => _launchPoint;
 
     [SerializeField] private float _fireRate;
-    [SerializeField] private Ammunition[] _ammunitions;
+    [SerializeField] protected Ammunition[] _ammunitions;
     public Ammunition[] Ammunitions => _ammunitions;
 
     private float _fireTimer;
@@ -38,8 +38,10 @@ public class Turret : NetworkBehaviour
         _syncSelectedAmmunitionIndex = index;
 
         if (isClient == true)
+        {
             CmdReloadAmmunation();
-
+        }
+            
         UpdateSelectedAmmunation?.Invoke(index);
     }
 

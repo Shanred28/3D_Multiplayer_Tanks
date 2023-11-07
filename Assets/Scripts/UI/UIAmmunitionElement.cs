@@ -12,10 +12,10 @@ public class UIAmmunitionElement : MonoBehaviour
     {
         _projectileIcon.sprite = ammunition.ProjectileProp.IconProjectile;
 
-        UpdateeAmmoCount(ammunition.AmmoCount);
+        UpdateAmmoCount(ammunition.AmmoCount);
     }
 
-    public void UpdateeAmmoCount(int count)
+    public void UpdateAmmoCount(int count)
     {
         _ammoCountText.text = count.ToString();
     }

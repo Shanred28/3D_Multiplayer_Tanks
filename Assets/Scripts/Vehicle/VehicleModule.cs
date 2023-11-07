@@ -7,6 +7,7 @@ public class VehicleModule : Destructible
     [SerializeField] private float _recoveryTime;
 
     private float _remainingRecoveryTime;
+    public float RemainingRecoveryTime => _remainingRecoveryTime;
 
     private void Awake()
     {
@@ -36,7 +37,7 @@ public class VehicleModule : Destructible
 
     private void OnDestroy()
     {
-        Destroyed -= OnModuleDestroyed;
+        Destroyed -= OnModuleDestroyed;      
     }
 
     private void OnModuleDestroyed(Destructible arg0)

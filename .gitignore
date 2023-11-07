@@ -406,3 +406,4 @@ FodyWeavers.xsd
 /Assets/RTP Vol.1
 /Assets/TerrainSampleAssets
 *.asset
+/Build

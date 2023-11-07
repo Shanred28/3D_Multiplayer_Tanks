@@ -8,7 +8,7 @@ public class UIMinimap : MonoBehaviour
     [SerializeField] private Image _background;
 
     private UITankMark[] _tankMarks;
-    private Player[] _players;
+    private Vehicle[] _vehicles;
 
     private void Start()
     {
@@ -22,8 +22,8 @@ public class UIMinimap : MonoBehaviour
 
         for (int i = 0; i < _tankMarks.Length; i++)
         {
-            if (_players[i] == null) continue;
-            Vector3 normalPos = _sizeMap.GetNormPos(_players[i].activeVehicle.transform.position);
+            if (_vehicles[i] == null) continue;
+            Vector3 normalPos = _sizeMap.GetNormPos(_vehicles[i].transform.position);
 
             Vector3 posInMinimap = new Vector3(normalPos.x * _background.rectTransform.sizeDelta.x * 0.5f, 
                 normalPos.z * _background.rectTransform.sizeDelta.y * 0.5f, 0);
@@ -40,14 +40,14 @@ public class UIMinimap : MonoBehaviour
 
     private void OnMatchStart()
     { 
-      _players = FindObjectsOfType<Player>();
-        _tankMarks = new UITankMark[_players.Length];
+        _vehicles = FindObjectsOfType<Vehicle>();
+        _tankMarks = new UITankMark[_vehicles.Length];
 
         for (int i = 0; i < _tankMarks.Length; i++)
         {
             _tankMarks[i] = Instantiate(_tankMarkPref);
 
-            if (_players[i].TeamId == Player.Local.TeamId)
+            if (_vehicles[i].TeamId == Player.Local.TeamId)
                 _tankMarks[i].SetLocalColor();
             else
                 _tankMarks[i].SetOtherColor();
