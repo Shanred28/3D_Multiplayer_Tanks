@@ -24,6 +24,12 @@ public class UITankInfoCollector : MonoBehaviour
 
             if (_tanksInfo[i] == null ) continue;
 
+            bool isVisible = Player.Local.activeVehicle.VehicleViewer.IsVisable(_tanksInfo[i].Tank.netIdentity);
+
+            _tanksInfo[i].gameObject.SetActive(isVisible);
+
+            if(_tanksInfo[i].gameObject.activeSelf == false) continue;
+
             Vector3 screenPos = Camera.main.WorldToScreenPoint(_tanksInfo[i].Tank.transform.position + _tanksInfo[i].WorldOffset);
 
             if (screenPos.z > 0)

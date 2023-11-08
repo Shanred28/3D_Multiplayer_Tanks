@@ -110,7 +110,7 @@ public class TrackTank : Vehicle
 {
     public override float LinearVelocity => _rb.velocity.magnitude;
 
-    [SerializeField] private Transform _ceenterOfMass;
+    [SerializeField] private Transform _centerOfMass;
 
     [Header("Tracks")]   
     [SerializeField] private TrackWheelRow _leftWheelRow;
@@ -145,10 +145,14 @@ public class TrackTank : Vehicle
     private Rigidbody _rb;
     private float _currentMotorTorque;
 
-    private void Start()
+    private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
-        _rb.centerOfMass = _ceenterOfMass.localPosition;
+    }
+
+    private void Start()
+    {      
+        _rb.centerOfMass = _centerOfMass.localPosition;
         Destroyed += OnTrackTankDestroyed;
     }
 
