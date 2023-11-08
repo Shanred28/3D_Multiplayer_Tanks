@@ -1,5 +1,6 @@
 using Mirror;
 using UnityEngine;
+using static UnityEditorInternal.ReorderableList;
 
 public class Vehicle : Destructible
 {
@@ -16,6 +17,8 @@ public class Vehicle : Destructible
     public Transform zoomOpticsPosition => _zoomOpticsPoint;
 
     public virtual float LinearVelocity => 0;
+
+    protected float syncLinearVelocity;
 
     public Turret Turret;
     public VehicleViewer VehicleViewer;
@@ -45,9 +48,9 @@ public class Vehicle : Destructible
     {
         get 
         {
-            if (Mathf.Approximately(0, LinearVelocity) == true) return 0;
+            if (Mathf.Approximately(0, syncLinearVelocity) == true) return 0;
 
-            return Mathf.Clamp01(LinearVelocity / _maxLinearVelosity);
+            return Mathf.Clamp01(syncLinearVelocity / _maxLinearVelosity);
         }
     }
 
@@ -66,9 +69,17 @@ public class Vehicle : Destructible
     public void SetVisibile(bool visible)
     {
         if (visible == true)
+        {
+            if (gameObject.layer == LayerMask.NameToLayer("Default")) return;
             SetLayerToAll("Default");
+        }
+
         else
+        {
+            if (gameObject.layer == LayerMask.NameToLayer("Ignore Main Camera")) return;
             SetLayerToAll("Ignore Main Camera");
+        }
+            
     }
 
     private void SetLayerToAll(string layerName)

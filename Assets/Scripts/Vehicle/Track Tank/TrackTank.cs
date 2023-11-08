@@ -168,6 +168,8 @@ public class TrackTank : Vehicle
             UpdateMotorTorque();
 
             CmdUpdateWheelRpm(LeftWheelRpm, RightWheelRpm);
+
+            CmdUpdateLinearVelocity(LinearVelocity);
         }
     }
 
@@ -177,6 +179,12 @@ public class TrackTank : Vehicle
 
         ruinedVisualModel.transform.position = _visualModel.transform.position;
         ruinedVisualModel.transform.rotation = _visualModel.transform.rotation;
+    }
+
+    [Command]
+    private void CmdUpdateLinearVelocity(float velocity)
+    { 
+         syncLinearVelocity = velocity;
     }
 
     [Command]

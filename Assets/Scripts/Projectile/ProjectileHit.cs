@@ -48,8 +48,10 @@ public class ProjectileHit : MonoBehaviour
             { 
               _hitArmor = armor;
             }
-
             _isHit = true;
+
+            if(_raycastHit.collider.TryGetComponent(out PartialBarrier barrier))
+                _isHit = false;
         }
     }
 

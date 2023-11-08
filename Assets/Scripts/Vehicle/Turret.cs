@@ -5,6 +5,7 @@ using UnityEngine.Events;
 public class Turret : NetworkBehaviour
 {
     public event UnityAction<int> UpdateSelectedAmmunation;
+    public event UnityAction Shot;
 
     [SerializeField] protected Transform _launchPoint;
     public Transform LaunchPoint => _launchPoint;
@@ -70,6 +71,8 @@ public class Turret : NetworkBehaviour
         _fireTimer = _fireRate;
 
         RpcFire();
+
+        Shot?.Invoke();
     }
 
     [ClientRpc]
@@ -80,6 +83,8 @@ public class Turret : NetworkBehaviour
         _fireTimer = _fireRate;
 
         OnFire();
+
+        Shot?.Invoke();
     }
 
     protected virtual void Update()

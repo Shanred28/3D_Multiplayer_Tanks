@@ -5,8 +5,10 @@ using System.Collections.Generic;
 [RequireComponent(typeof(Vehicle))]
 public class VehicleViewer : NetworkBehaviour
 {
+    private const float UPDATE_INTERVAL = 0.33f;
     private const float  X_RAY_DISTANCE = 50.0f;
     private const float  BASE_EXIT_TIME_FROM_DISCOVERY = 10.0f;
+    private const float CAMOUFLAGE_DISTANCE = 150.0f;
 
     [SerializeField] private float _viewDistance;
     [SerializeField] private Transform[] _viewPoints;
@@ -18,6 +20,7 @@ public class VehicleViewer : NetworkBehaviour
     public List<float> _remainingTime = new List<float>();
 
     private Vehicle _vehicle;
+    private float _remaningTimeLastUpdate;
 
     public override void OnStartServer()
     {
@@ -37,64 +40,60 @@ public class VehicleViewer : NetworkBehaviour
     {
         if (isServer == false) return;
 
-        for (int i = 0; i < _allVehicleDimensions.Count; i++)
+        _remaningTimeLastUpdate += Time.deltaTime;
+
+        if (_remaningTimeLastUpdate >= UPDATE_INTERVAL)
         {
-            if (_allVehicleDimensions[i].Vehicle == null) continue;
-
-            bool isVisable = true;
-
-/*            if (Vector3.Distance(_vehicle.transform.position, _allVehicleDimensions[i].transform.position) <= X_RAY_DISTANCE)
+            for (int i = 0; i < _allVehicleDimensions.Count; i++)
             {
-                _visableVehicles.Add(_allVehicleDimensions[i].Vehicle.netIdentity);
-                _remainingTime.Add(-1);
-                continue;
-            }*/
-               
+                if (_allVehicleDimensions[i].Vehicle == null) continue;
 
-            for (int j = 0; j < _viewPoints.Length; j++)
-            {
-                
-                isVisable = CheckVisibility(_viewPoints[j].position, _allVehicleDimensions[i], i);
-                if (isVisable == true) break;
+                bool isVisable = true;
+
+                for (int j = 0; j < _viewPoints.Length; j++)
+                {
+
+                    isVisable = CheckVisibility(_viewPoints[j].position, _allVehicleDimensions[i], i);
+                    if (isVisable == true) break;
+                }
+
+                if (isVisable == true && _visableVehicles.Contains(_allVehicleDimensions[i].Vehicle.netIdentity) == false)
+                {
+                    _visableVehicles.Add(_allVehicleDimensions[i].Vehicle.netIdentity);
+                    _remainingTime.Add(-1);
+                }
+
+                if (isVisable == true && _visableVehicles.Contains(_allVehicleDimensions[i].Vehicle.netIdentity) == true)
+                {
+                    _remainingTime[_visableVehicles.IndexOf(_allVehicleDimensions[i].Vehicle.netIdentity)] = -1;
+                }
+
+
+                if (isVisable == false && _visableVehicles.Contains(_allVehicleDimensions[i].Vehicle.netIdentity) == true)
+                {
+                    if (_remainingTime[_visableVehicles.IndexOf(_allVehicleDimensions[i].Vehicle.netIdentity)] == -1)
+                        _remainingTime[_visableVehicles.IndexOf(_allVehicleDimensions[i].Vehicle.netIdentity)] = BASE_EXIT_TIME_FROM_DISCOVERY;
+
+                }
             }
-
-            if (isVisable == true && _visableVehicles.Contains(_allVehicleDimensions[i].Vehicle.netIdentity) == false)
-            {
-                _visableVehicles.Add(_allVehicleDimensions[i].Vehicle.netIdentity);
-                _remainingTime.Add(-1);
-            }
-
-            if (isVisable == true && _visableVehicles.Contains(_allVehicleDimensions[i].Vehicle.netIdentity) == true)
-            {
-                _remainingTime[_visableVehicles.IndexOf(_allVehicleDimensions[i].Vehicle.netIdentity)] = -1;
-            }
-                    
-
-            if (isVisable == false && _visableVehicles.Contains(_allVehicleDimensions[i].Vehicle.netIdentity) == true)
-            {
-                if (_remainingTime[_visableVehicles.IndexOf(_allVehicleDimensions[i].Vehicle.netIdentity)] == -1)
-                    _remainingTime[_visableVehicles.IndexOf(_allVehicleDimensions[i].Vehicle.netIdentity)] = BASE_EXIT_TIME_FROM_DISCOVERY;
-
-                /*_visableVehicles.Remove(_allVehicleDimensions[i].Vehicle.netIdentity);*/
-            }
+            _remaningTimeLastUpdate = 0;
         }
-
-        for (int i = 0; i < _remainingTime.Count; i++)
-        {
-            if (_remainingTime[i] > 0)
+            for (int i = 0; i < _remainingTime.Count; i++)
             {
-                _remainingTime[i] -= Time.deltaTime;
+                if (_remainingTime[i] > 0)
+                {
+                    _remainingTime[i] -= Time.deltaTime;
 
-                if (_remainingTime[i] <= 0)
-                    _remainingTime[i] = 0;
-            }
+                    if (_remainingTime[i] <= 0)
+                        _remainingTime[i] = 0;
+                }
 
-            if (_remainingTime[i] == 0)
-            { 
-                _remainingTime.RemoveAt(i);
-                _visableVehicles.RemoveAt(i);
-            }
-        }
+                if (_remainingTime[i] == 0)
+                {
+                    _remainingTime.RemoveAt(i);
+                    _visableVehicles.RemoveAt(i);
+                }
+            }                  
     }
 
     public bool IsVisable(NetworkIdentity identity)
@@ -122,8 +121,7 @@ public class VehicleViewer : NetworkBehaviour
             {
                 _visableVehicles.Add(vd.Vehicle.netIdentity);
                 _remainingTime.Add(-1);
-            }
-                
+            }               
         }
     }
 
@@ -135,7 +133,20 @@ public class VehicleViewer : NetworkBehaviour
 
         if(distance > _viewDistance) return false;
 
-        
+        float currentViewDist = _viewDistance;
+
+        if (distance >= CAMOUFLAGE_DISTANCE)
+        {
+            VehicleCamouflage vehicleCamouflage = vehicleDimensions.Vehicle.GetComponent<VehicleCamouflage>();
+
+            if (vehicleCamouflage != null)
+            {
+               var distBarr = vehicleDimensions.DistanseToPartialBarrier(transform.root, viewPoint);
+                currentViewDist = _viewDistance - vehicleCamouflage.CurrentDistance + distBarr /2;
+            }              
+        }
+
+        if(distance > currentViewDist) return false;       
 
         return vehicleDimensions.IsVisableFromPoint(transform.root, viewPoint, _color);
     }

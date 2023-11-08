@@ -3,10 +3,14 @@ using UnityEngine;
 [RequireComponent(typeof(Vehicle))]
 public class VehicleDimensions : MonoBehaviour
 {
+    private const float DIST_BARRIER_BLOCK_VISABLE = 100.0f;
+
     [SerializeField] private Transform[] _points;
 
     private Vehicle _vehicle;
     public Vehicle Vehicle => _vehicle;
+
+    RaycastHit[] hits = new RaycastHit[10];
 
     private void Awake()
     {
@@ -20,24 +24,49 @@ public class VehicleDimensions : MonoBehaviour
 
         for (int i = 0; i < _points.Length; i++)
         {
-            Debug.DrawLine(point, _points[i].position,color);
+            //Debug
+            Debug.DrawLine(point, _points[i].position,color);  
 
-            RaycastHit[] hits = Physics.RaycastAll(point, (_points[i].position - point).normalized, Vector3.Distance(point, _points[i].position));
+            int l = Physics.RaycastNonAlloc(point, (_points[i].position - point).normalized, hits, Vector3.Distance(point, _points[i].position));
 
             isVisable = true;
 
-            for (int j = 0; j < hits.Length; j++)
+            for (int j = 0; j < l; j++)
             {
                 if (hits[j].collider.transform.root == source) continue;
                 if(hits[j].collider.transform.root == transform.root) continue;
+                if (hits[j].collider.TryGetComponent(out PartialBarrier barrier) && DIST_BARRIER_BLOCK_VISABLE >=  Vector3.Distance(point, barrier.transform.position)) continue;
 
-                isVisable = false;
+                    isVisable = false;
             }
             if (isVisable == true)
                 return isVisable;
         }
 
         return false;
+    }
+
+    public float DistanseToPartialBarrier(Transform source, Vector3 point)
+    {
+        float distBarrier = 0;
+        for (int i = 0; i < _points.Length; i++)
+        {
+            int l = Physics.RaycastNonAlloc(point, (_points[i].position - point).normalized, hits, Vector3.Distance(point, _points[i].position));
+            for (int j = 0; j < l; j++)
+            {
+                if (hits[j].collider.transform.root == source) continue;
+                if (hits[j].collider.transform.root == transform.root) continue;
+
+                if (hits[j].collider.TryGetComponent(out PartialBarrier barrier))
+                {
+                    var dist = Vector3.Distance(source.position, barrier.transform.position);
+                    if(distBarrier < dist)
+                        distBarrier = dist;
+                }
+            }
+        }
+
+         return distBarrier;
     }
 
 #if UNITY_EDITOR
