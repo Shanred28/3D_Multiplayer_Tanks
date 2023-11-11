@@ -23,7 +23,7 @@ public class TeamBase : MonoBehaviour
 
         if(_allVehicles.Contains(v) == true) return;
 
-        if(v.Owner.GetComponent<Player>().TeamId == _teamId) return;
+        if(v.Owner.GetComponent<MatchMember>().TeamId == _teamId) return;
 
         v.HitPointChanged += OnHitPointChange;
 

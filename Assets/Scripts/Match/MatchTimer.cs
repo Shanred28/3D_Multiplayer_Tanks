@@ -11,11 +11,7 @@ public class MatchTimer : NetworkBehaviour, IMatchCondition
 
     private bool _isTimerEnd = false;
     
-
-
     bool IMatchCondition.IsTriggered => _isTimerEnd;
-
-
 
     public void OnServerMatchStart(MatchController controller)
     {
@@ -29,6 +25,8 @@ public class MatchTimer : NetworkBehaviour, IMatchCondition
 
     private void Start()
     {
+        _timeLeft = _matchTimer;
+
         if (isServer == true)
         { 
             enabled = false;

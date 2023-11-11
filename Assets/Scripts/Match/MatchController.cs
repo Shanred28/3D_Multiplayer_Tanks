@@ -1,4 +1,6 @@
 using Mirror;
+using System.Collections;
+using UnityEngine;
 using UnityEngine.Events;
 
 public interface IMatchCondition
@@ -11,11 +13,25 @@ public interface IMatchCondition
 
 public class MatchController : NetworkBehaviour
 {
+    private static int TeamIdCounter;
+
+    public static int GetNextTeam()
+    { 
+        return TeamIdCounter++ % 2;
+    }
+    public static void ResetTeamCounter()
+    {
+        TeamIdCounter = 1;
+    }
+
     public event UnityAction MatchStart;
     public event UnityAction MatchEnd;
 
     public event UnityAction SvMatchStart;
     public event UnityAction SvMatchEnd;
+
+    [SerializeField] private MatchMemberSpawner _spawner;
+    [SerializeField] private float _delayAfterSpawnBeforeStartMatch = 0.5f;
 
     public int WinTeamId = -1;
 
@@ -55,21 +71,14 @@ public class MatchController : NetworkBehaviour
 
         _matchActive = true;
 
-        foreach (var p in FindObjectsOfType<Player>())
-        {
-            if (p.activeVehicle != null)
-            {
-                NetworkServer.UnSpawn(p.activeVehicle.gameObject);
-                Destroy(p.activeVehicle.gameObject);
+        _spawner.SvRespawnVehiclesAllMembers();
 
-                p.activeVehicle = null;
-            }
-        }
+        StartCoroutine(StartEventMatchWitchDelay(_delayAfterSpawnBeforeStartMatch));
+    }
 
-        foreach (var p in FindObjectsOfType<Player>())
-        {
-            p.SvSpawnClientVeehicle();
-        }
+    private IEnumerator StartEventMatchWitchDelay(float delay)
+    { 
+        yield return new WaitForSeconds(delay);
 
         foreach (IMatchCondition condition in _matchConditions)
         {

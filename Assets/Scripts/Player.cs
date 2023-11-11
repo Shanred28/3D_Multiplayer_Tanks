@@ -2,37 +2,8 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.Events;
 
-[System.Serializable]
-public class  PlayerData
-{
-    public int Id;
-    public string Nickname;
-    public int TeamId;
 
-    public PlayerData(int id, string nickname, int teamId)
-    {
-        Id = id;
-        Nickname = nickname;
-        TeamId = teamId;
-    }
-}
-
-public static class PlayerDataReadWriter    
-{
-    public static void WritePlayerData(this NetworkWriter writer, PlayerData value)
-    {
-        writer.WriteInt(value.Id);
-        writer.WriteString(value.Nickname);
-        writer.WriteInt(value.TeamId);
-    }
-
-    public static PlayerData ReadPlayerData(this NetworkReader reader)
-    {
-        return new PlayerData(reader.ReadInt(), reader.ReadString(), reader.ReadInt());
-    }
-}
-
-public class Player : NetworkBehaviour
+public class Player : MatchMember
 {
     public static Player Local
     {
@@ -46,90 +17,18 @@ public class Player : NetworkBehaviour
             return null;
         }
     }
-
-    private static int TeamIdCounter;
-    public static UnityAction<int, int> ChangeFrags;
-
+ 
     public event UnityAction<Vehicle> VehicleSpawned;
     public event UnityAction<ProjectileHitResult> ProjectileHit;
-    public Vehicle activeVehicle { get; set; }
 
     [SerializeField] private Vehicle _vehiclePrefs;
     [SerializeField] private VehicleInputControl _vehicleInputControl;
-
-    [Header("Player")]
-    [SyncVar(hook = nameof(OnNicknameChanged))]
-    public string Nickname;
-
-    [SyncVar(hook = nameof(OnFragChanged))]
-    private int _frags;
-    public int Frags
-    {
-        get { return _frags; }
-
-        set
-        {
-            _frags = value;
-            ChangeFrags?.Invoke((int)netId, _frags);
-        }
-    }
-
-    [Server]
-    public void SvInvokeProjectileHit(ProjectileHitResult hitResult)
-    {
-        ProjectileHit?.Invoke(hitResult);
-        RpcInvokeProjectileHit(hitResult.type, hitResult.damage, hitResult.point);
-    }
-
-    [ClientRpc]
-    public void RpcInvokeProjectileHit(ProjectileHitType type, float damage, Vector3 hitPoint)
-    {
-        ProjectileHitResult hitResult = new ProjectileHitResult();
-        hitResult.damage = damage;
-        hitResult.type = type;
-        hitResult.point = hitPoint;
-
-        ProjectileHit?.Invoke(hitResult);
-    }
-
-    [SyncVar]
-    private int _teamId;
-    public int TeamId => _teamId;
-
-    private PlayerData _playerData;
-    public PlayerData PlayerData => _playerData;
-
-    private void OnNicknameChanged(string oldValue, string newValue)
-    { 
-        gameObject.name = "Player_" + newValue; 
-    }
-
-    [Command]
-    public void CmdSetName(string name)
-    { 
-        Nickname = name;
-        gameObject.name = "Player_" + name;
-    }
-
-    [Command]
-    public void CmdSetTeamId(int teamId)
-    { 
-        _teamId = teamId;
-    }
 
     public override void OnStartServer()
     {
         base.OnStartServer();
 
-        _teamId = TeamIdCounter % 2;
-        TeamIdCounter++;       
-    }
-
-    public override void OnStopServer()
-    {
-        base.OnStopServer();
-
-        PlayerList.Instance.SvRemovePlayer(_playerData);
+        _teamId = MatchController.GetNextTeam();
     }
 
     public override void OnStartClient()
@@ -139,16 +38,80 @@ public class Player : NetworkBehaviour
         if (isOwned == true)
         {
             CmdSetName(NetworkSessionManager.Instance.GetComponent<NetworkManagerHUD>().PlayerNickname);
+
+            NetworkSessionManager.Match.MatchStart += OnMatchStart;
             NetworkSessionManager.Match.MatchEnd += OnMatchEnd;
 
-           _playerData = new PlayerData((int)netId, NetworkSessionManager.Instance.GetComponent<NetworkManagerHUD>().PlayerNickname, _teamId);
+            _data = new MatchMemberData((int)netId, NetworkSessionManager.Instance.GetComponent<NetworkManagerHUD>().PlayerNickname, _teamId, netIdentity);
 
-            CmdAddPlayer(PlayerData);
+            CmdAddPlayer(MemberData);
 
-            CmdUpdateData(_playerData);
+            CmdUpdateData(_data);
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
+        }
+    }
+
+    private void Start()
+    {
+        _vehicleInputControl.enabled = false;
+    }
+
+    [Server]
+    public void SvSpawnClientVehicle()
+    {
+        if (activeVehicle != null) return;
+
+        GameObject playerVehicle = Instantiate(_vehiclePrefs.gameObject);
+        playerVehicle.transform.position = _teamId % 2 == 0 ?
+            NetworkSessionManager.Instance.RandomSpawnPointRed : NetworkSessionManager.Instance.RandomSpawnPintBlue;
+
+        NetworkServer.Spawn(playerVehicle, netIdentity.connectionToClient);
+
+
+        activeVehicle = playerVehicle.GetComponent<Vehicle>();
+        activeVehicle.Owner = netIdentity;
+        activeVehicle.TeamId = _teamId;
+
+        RpcSetVehicle(activeVehicle.netIdentity);
+    }
+
+    [ClientRpc]
+    private void RpcSetVehicle(NetworkIdentity vehicle)
+    {
+        if (vehicle == null) return;
+
+        activeVehicle = vehicle.GetComponent<Vehicle>();
+        activeVehicle.Owner = netIdentity;
+        activeVehicle.TeamId = _teamId;
+
+        if (activeVehicle != null && activeVehicle.isOwned && VehicleCamera.Instance != null)
+        {
+            VehicleCamera.Instance.SetTarget(activeVehicle);
+        }
+
+        VehicleSpawned?.Invoke(activeVehicle);
+        
+    }
+
+    [Command]
+    private void CmdAddPlayer(MatchMemberData playerData)
+    {
+        MatchMemberList.Instance.SvAddPlayer(playerData);
+    }
+
+    private void OnMatchStart()
+    {
+        _vehicleInputControl.enabled = true;
+    }
+
+    private void OnMatchEnd()
+    {
+        if (activeVehicle != null)
+        {
+            activeVehicle.SetTargetControl(Vector3.zero);
+            _vehicleInputControl.enabled = false;
         }
     }
 
@@ -162,6 +125,13 @@ public class Player : NetworkBehaviour
             Cursor.lockState = CursorLockMode.None;
         }
     }
+    public override void OnStopServer()
+    {
+        base.OnStopServer();
+
+        MatchMemberList.Instance.SvRemovePlayer(_data);
+    }
+
 
     private void Update()
     {
@@ -194,65 +164,20 @@ public class Player : NetworkBehaviour
     }
 
     [Server]
-    public void SvSpawnClientVeehicle()
+    public void SvInvokeProjectileHit(ProjectileHitResult hitResult)
     {
-        if (activeVehicle != null) return;
-
-        GameObject playerVehicle = Instantiate(_vehiclePrefs.gameObject);
-        playerVehicle.transform.position = _teamId % 2 == 0 ?
-            NetworkSessionManager.Instance.RandomSpawnPointRed : NetworkSessionManager.Instance.RandomSpawnPintBlue;
-
-        NetworkServer.Spawn(playerVehicle, netIdentity.connectionToClient);
-       
-
-        activeVehicle = playerVehicle.GetComponent<Vehicle>();        
-        activeVehicle.Owner = netIdentity;
-        activeVehicle.TeamId = _teamId;
-
-        RpcSetVehicle(activeVehicle.netIdentity);
+        ProjectileHit?.Invoke(hitResult);
+        RpcInvokeProjectileHit(hitResult.type, hitResult.damage, hitResult.point);
     }
 
     [ClientRpc]
-    private void RpcSetVehicle(NetworkIdentity vehicle)
+    public void RpcInvokeProjectileHit(ProjectileHitType type, float damage, Vector3 hitPoint)
     {
-        if (vehicle == null) return;
+        ProjectileHitResult hitResult = new ProjectileHitResult();
+        hitResult.damage = damage;
+        hitResult.type = type;
+        hitResult.point = hitPoint;
 
-        activeVehicle = vehicle.GetComponent<Vehicle>();
-        activeVehicle.Owner = netIdentity;
-        activeVehicle.TeamId = _teamId;
-
-        if (activeVehicle != null && activeVehicle.isOwned && VehicleCamera.Instance != null)
-        {
-            VehicleCamera.Instance.SetTarget(activeVehicle);
-        }
-
-        VehicleSpawned?.Invoke(activeVehicle);
-        _vehicleInputControl.enabled = true;
-    }
-
-    [Command]
-    private void CmdAddPlayer(PlayerData playerData)
-    {
-        PlayerList.Instance.SvAddPlayer(playerData);
-    }
-
-    [Command]
-    private void CmdUpdateData(PlayerData playerData)
-    { 
-        _playerData = playerData;
-    }
-
-    private void OnMatchEnd()
-    {
-        if (activeVehicle != null)
-        {
-            activeVehicle.SetTargetControl(Vector3.zero);
-            _vehicleInputControl.enabled = false;
-        }
-    }
-
-    private void OnFragChanged(int old, int newValue)
-    {
-        ChangeFrags?.Invoke((int)netId, newValue);
+        ProjectileHit?.Invoke(hitResult);
     }
 }
