@@ -6,6 +6,7 @@ public class VehicleDimensions : MonoBehaviour
     private const float DIST_BARRIER_BLOCK_VISABLE = 100.0f;
 
     [SerializeField] private Transform[] _points;
+    [SerializeField] private Transform[] _priorityFireTargetPoints;
 
     private Vehicle _vehicle;
     public Vehicle Vehicle => _vehicle;
@@ -67,6 +68,11 @@ public class VehicleDimensions : MonoBehaviour
         }
 
          return distBarrier;
+    }
+
+    public Transform[] GetFirePoint()
+    {
+        return _priorityFireTargetPoints;
     }
 
 #if UNITY_EDITOR

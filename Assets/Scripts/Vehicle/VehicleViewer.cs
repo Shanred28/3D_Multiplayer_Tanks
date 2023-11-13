@@ -101,6 +101,27 @@ public class VehicleViewer : NetworkBehaviour
         return _visableVehicles.Contains(identity);
     }
 
+    public List<Vehicle> GetAllVehicle()
+    { 
+        List<Vehicle> av = new List<Vehicle>(_allVehicleDimensions.Count);
+
+        for (int i = 0; i < _allVehicleDimensions.Count; i++)
+        {
+            av.Add(_allVehicleDimensions[i].Vehicle);
+        }
+        return av;
+    }
+
+    public List<Vehicle> GetAllVisableVehicle()
+    {
+        List<Vehicle> av = new List<Vehicle>(_allVehicleDimensions.Count);
+
+        for (int i = 0; i < _visableVehicles.Count; i++)
+        {
+            av.Add(_visableVehicles[i].GetComponent<Vehicle>());
+        }
+        return av;
+    }
 
     private void OnSvMatchStart()
     {

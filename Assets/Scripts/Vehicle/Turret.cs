@@ -25,7 +25,7 @@ public class Turret : NetworkBehaviour
 
     [SerializeField] protected float _minSpreadShootRange;
     [SerializeField] protected float _maxSpreadShootRange;
-    [SerializeField] protected float _currentSpreadShootRange;
+    protected float _currentSpreadShootRange;
     public float CurrentSpreadShootRange => _currentSpreadShootRange;
 
     protected virtual void OnFire() { }
@@ -54,14 +54,8 @@ public class Turret : NetworkBehaviour
             CmdFire();
     }
 
-    [Command]
-    private void CmdReloadAmmunation()
-    {
-        _fireTimer = _fireRate;
-    }
-
-    [Command]
-    private void CmdFire()
+    [Server]
+    public void SvFire()
     {
         if (_fireTimer > 0) return;
 
@@ -73,6 +67,18 @@ public class Turret : NetworkBehaviour
         RpcFire();
 
         Shot?.Invoke();
+    }
+
+    [Command]
+    private void CmdReloadAmmunation()
+    {
+        _fireTimer = _fireRate;
+    }
+
+    [Command]
+    private void CmdFire()
+    {
+        SvFire();
     }
 
     [ClientRpc]

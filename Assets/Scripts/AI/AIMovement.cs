@@ -43,17 +43,12 @@ public class AIMovement : MonoBehaviour
     private float _timerUpdatePath;
 
     public bool HasPatch => _hasPath;
-    public bool RestartDistination => _rechedDistination;
+    public bool ReachedDistination => _rechedDistination;
 
     private void Awake()
     {
         _path = new NavMeshPath();
         _vehicle = GetComponent<Vehicle>();
-    }
-
-    private void Start()
-    {
-        _target = GameObject.FindGameObjectWithTag("Finish").transform.position;
     }
 
     private void Update()
@@ -164,7 +159,7 @@ public class AIMovement : MonoBehaviour
         }
         else
         {
-            turnControl = Mathf.Clamp(Vector3.SignedAngle(tankDir, refereenceDirection, Vector3.up), -45.0f, 45.0f) / 45.0f;
+            turnControl = Mathf.Clamp(Vector3.SignedAngle(tankDir, refereenceDirection, Vector3.up), -90.0f, 90.0f) / 90.0f;
 
             float minSideDistance = 1;
 
@@ -174,7 +169,7 @@ public class AIMovement : MonoBehaviour
             if (rightSensorState.Item1 && rightSensorState.Item2 < minSideDistance && turnControl > 0)
                 turnControl = -turnControl;
         }
-        
+
         _vehicle.SetTargetControl(new Vector3(turnControl,0,forwardThrust));
     }
 
@@ -191,6 +186,6 @@ public class AIMovement : MonoBehaviour
         var tankPos = _vehicle.transform.GetPositionZX();
         var targetPos = _nextPathPoint.GetPositionZX();
 
-        return (tankPos - tankPos).normalized;
+        return (targetPos - tankPos).normalized;
     }
 }

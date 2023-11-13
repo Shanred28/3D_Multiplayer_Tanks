@@ -32,7 +32,9 @@ public class Vehicle : Destructible
         set
         { 
             _netAimPoint = value;
-            CmdSetNetAimPoint(value);
+
+            if(isOwned == true)
+                CmdSetNetAimPoint(value);
         }
     }
 
