@@ -140,7 +140,7 @@ public class AIMovement : MonoBehaviour
 
         if (forwardSensorState.Item1 == true)
         {
-            forwardThrust = 0;
+            forwardThrust = -1;
 
             if (leftSensorState.Item1 == false)
             {
@@ -152,14 +152,14 @@ public class AIMovement : MonoBehaviour
                 turnControl = 1;
                 forwardThrust = -0.2f;
             }
-            else
+/*            else
             {
                 forwardThrust = -1;
-            }
+            }*/
         }
         else
         {
-            turnControl = Mathf.Clamp(Vector3.SignedAngle(tankDir, refereenceDirection, Vector3.up), -90.0f, 90.0f) / 90.0f;
+            turnControl = Mathf.Clamp(Vector3.SignedAngle(tankDir, refereenceDirection, Vector3.up), -45.0f, 45.0f) / 45.0f;
 
             float minSideDistance = 1;
 

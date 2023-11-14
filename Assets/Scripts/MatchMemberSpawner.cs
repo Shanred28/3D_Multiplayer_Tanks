@@ -43,7 +43,7 @@ public class MatchMemberSpawner : NetworkBehaviour
             Destroy(b.activeVehicle.gameObject);            
         }
 
-       int botAmmount = _targetAmmountMeemberTeam * 2 - MatchMemberList.Instance.MeemberDataCount;
+       int botAmmount = _targetAmmountMeemberTeam * 2 - MatchMemberList.Instance.MemberDataCount;
 
         for (int i = 0; i < botAmmount; i++)
         {

@@ -13,13 +13,15 @@ public class UIPlayerList : MonoBehaviour
     private void Start()
     {
         MatchMemberList.UpdateMemberList += OnUpdatePlayerList;
-        Player.ChangeFrags += OnChangeFrags;
+        MatchMember.ChangeFrags += OnChangeFrags;
+        MatchMember.DestroyMember += OnDestroyedVehicleMember;
     }
 
     private void OnDestroy()
     {
         MatchMemberList.UpdateMemberList -= OnUpdatePlayerList;
-        Player.ChangeFrags -= OnChangeFrags;
+        MatchMember.ChangeFrags -= OnChangeFrags;
+        MatchMember.DestroyMember -= OnDestroyedVehicleMember;
     }
 
     private void OnUpdatePlayerList(List<MatchMemberData> playerData)
@@ -67,6 +69,17 @@ public class UIPlayerList : MonoBehaviour
             if (_allPlayerLable[i].NetId == matchMember.netId)
             {
                 _allPlayerLable[i].UpdateFrag(frags);
+            }
+        }
+    }
+
+    private void OnDestroyedVehicleMember(MatchMember matchMember)
+    {
+        for (int i = 0; i < _allPlayerLable.Count; i++)
+        {
+            if (_allPlayerLable[i].NetId == matchMember.netId)
+            {
+                _allPlayerLable[i].MemberDestroyed();
             }
         }
     }

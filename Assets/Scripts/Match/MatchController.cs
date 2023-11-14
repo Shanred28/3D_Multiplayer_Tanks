@@ -97,11 +97,6 @@ public class MatchController : NetworkBehaviour
         {
             condition.OnServerMatchEnd(this);
 
-/*            if (condition is MatchTimer)
-            {
-                WinTeamId = -1;
-            }*/
-
             if (condition is ConditionTeamDeathmath && condition.IsTriggered == true)
             {
                 WinTeamId = (condition as ConditionTeamDeathmath).WinTeamId;

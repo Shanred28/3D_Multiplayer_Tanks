@@ -76,8 +76,11 @@ public class AIShooter : MonoBehaviour
 
     private void LookOnTarget()
     {
-        if (_lookTransform == null) return;
-
+        if (_lookTransform == null) 
+        {
+            _vehicle.NetAimPoit = _firePosition.position + _vehicle.transform.forward;
+            return;
+        }          
        _vehicle.NetAimPoit = _lookTransform.position;
     }
 
@@ -99,7 +102,6 @@ public class AIShooter : MonoBehaviour
     private Transform GetPriorityFirePoint(VehicleDimensions vehicleDimensions)
     {
         Transform[] firePoints = vehicleDimensions.GetFirePoint();
-        print(firePoints);
         List<Transform> targets = new List<Transform>();
 
         RaycastHit hit;

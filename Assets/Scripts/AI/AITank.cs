@@ -5,13 +5,12 @@ public enum AIBehaviourType
 { 
     Patrol,
     Support,
-    InvaderBase
+    InvaderBase,
+    DefendBase
 }
 
 public class AITank : NetworkBehaviour
 {
-    [SerializeField] private AIBehaviourType _behaviourType;
-
     [Range(0, 1)]
     [SerializeField] private float _patrolChance;
     [Range(0, 1)]
@@ -23,18 +22,27 @@ public class AITank : NetworkBehaviour
     [SerializeField] private AIMovement _movement;
     [SerializeField] private AIShooter _shooter;
 
+    private AIBehaviourType _behaviourType;
+    public AIBehaviourType behaviourType => _behaviourType;
+
     //private Vehicle _targetFire;
+    private TeamBase _teamBase;
     private Vector3 _movementTarget;
 
     private int _startCountTeamMember;
     private int _countTeamMember;
+    private int _defBaseTank;
 
+    private bool _isCaptureTeamBase;
     private void Start()
     {
         NetworkSessionManager.Match.MatchStart += OnMatchStart;
         
         _movement.enabled = false;
         _shooter.enabled = false;
+        _teamBase = AIPath.Instance.GetMyBase(_vehicle.TeamId);
+        _teamBase.CaptureBase += OnCaptureBase;
+
 
         CalcTeamMember();
         SetStartBehaviour();
@@ -64,6 +72,7 @@ public class AITank : NetworkBehaviour
     {
         _movement.enabled = false;
         _shooter.enabled = false;
+        _vehicle.enabled = false;
     }
 
     private void SetStartBehaviour()
@@ -113,7 +122,7 @@ public class AITank : NetworkBehaviour
     private void StartBehaviour(AIBehaviourType type)
     {
         _behaviourType = type;
-
+                 
         if (_behaviourType == AIBehaviourType.InvaderBase)
         {
             _movementTarget = AIPath.Instance.GetBasePoint(_vehicle.TeamId);
@@ -128,10 +137,16 @@ public class AITank : NetworkBehaviour
         {
             _movementTarget = AIPath.Instance.GetRandomFirePoint(_vehicle.TeamId);
         }
-
+     
         _movement.ResetPath();
     }
+    private void OnCaptureBase(bool isCapture, int teamId)
+    {
+        if (_vehicle.TeamId != teamId) return;
 
+        print("Евент захват базы");
+        _isCaptureTeamBase = isCapture;
+    }
     private void OnReachedDistination()
     {
         if (_behaviourType == AIBehaviourType.Patrol)
@@ -160,7 +175,13 @@ public class AITank : NetworkBehaviour
     private void UpdateBehaviour()
     {
         //TODO
-        _shooter.FindTarget();
+        //_shooter.FindTarget();
+
+        if (_isCaptureTeamBase == true && _defBaseTank <= 2)
+        {
+            OnDefendBase();
+            return;
+        }
 
         if (_movement.ReachedDistination == true)
         {
@@ -171,7 +192,39 @@ public class AITank : NetworkBehaviour
         {
             _movement.SetDestination(_movementTarget);
         }
+
     }
 
+    private void OnDefendBase()
+    {
+        if (_defBaseTank < 3)
+        {
+            print("Выбор защитников");
+            Vehicle[] v = FindObjectsOfType<Vehicle>();
+
+            float minDist = float.MaxValue;
+            for (int i = 0; i < v.Length; i++)
+            {
+                if (v[i].TeamId == _vehicle.TeamId && v[i].GetComponent<AITank>().behaviourType != AIBehaviourType.DefendBase)
+                {
+                    float dist = Vector3.Distance(_teamBase.transform.position, v[i].transform.position);
+                    if (minDist < dist)
+                    {
+                        minDist = dist;
+                    }
+                }
+            }
+            float dist2 = Vector3.Distance(_teamBase.transform.position, transform.position);
+            if (dist2 > minDist && _defBaseTank > 2) return;
+            else
+            {
+                print("назначения защитников");
+                _defBaseTank++;
+                _behaviourType = AIBehaviourType.DefendBase;
+                _movementTarget = _teamBase.transform.position;
+                _movement.SetDestination(_movementTarget);
+            }
+        }
+    }
     #endregion
 }

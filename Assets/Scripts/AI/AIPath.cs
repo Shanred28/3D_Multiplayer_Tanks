@@ -4,6 +4,8 @@ public class AIPath : MonoBehaviour
 {
     public static AIPath Instance;
 
+    [SerializeField] private TeamBase[] _teamBase;
+
     [SerializeField] private Transform _baseRedPoint;
     [SerializeField] private Transform _baseBluePoint;
 
@@ -50,5 +52,27 @@ public class AIPath : MonoBehaviour
     public Vector3 GetRandomPatrolPoint()
     {
         return _patrolPoint[Random.Range(0, _patrolPoint.Length)].position;
+    }
+
+    public TeamBase GetMyBase(int teamId)
+    {
+        foreach (var b in _teamBase)
+        { 
+            if(teamId == b.TeamIdBase)
+                return b;
+        }
+
+        return null;
+
+/*        if (teamId == _teamBase.TeamIdBase
+        {
+            if()
+        }
+
+        if (teamId == TeamSide.TeamBlue)
+        {
+            return _baseBluePoint.position;
+        }
+        return Vector3.zero;*/
     }
 }

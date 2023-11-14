@@ -10,6 +10,7 @@ public class UIPlayerLable : MonoBehaviour
     [SerializeField] private Image _backgroundImage;
 
     [SerializeField] private Color _selfColor;
+    [SerializeField] private Color _destroyerColor;
 
     private int _netId;
     public int NetId => _netId;
@@ -28,5 +29,11 @@ public class UIPlayerLable : MonoBehaviour
     public void UpdateFrag(int frag)
     {
         _fragText.text = frag.ToString();
+    }
+
+    public void MemberDestroyed()
+    {
+        print("NickBleck");
+        _backgroundImage.color = _destroyerColor;
     }
 }

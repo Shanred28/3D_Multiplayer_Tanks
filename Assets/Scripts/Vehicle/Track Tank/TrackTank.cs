@@ -182,8 +182,9 @@ public class TrackTank : Vehicle
         }
     }
 
-    private void OnTrackTankDestroyed(Destructible arg0)
-    {
+    private void OnTrackTankDestroyed(Destructible dest)
+    {       
+        dest.GetComponent<MatchMember>().SvDestroyMember();
         GameObject ruinedVisualModel = Instantiate(_destroedPref);
 
         ruinedVisualModel.transform.position = _visualModel.transform.position;

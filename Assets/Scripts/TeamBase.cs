@@ -1,18 +1,22 @@
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Collider))]
 public class TeamBase : MonoBehaviour
 {
+    public event UnityAction<bool, int> CaptureBase;
+
     [SerializeField] private float _captureLevel;
     [SerializeField] private float _captureAmmountPerVehicle;
     [SerializeField] private int _teamId;
+    public int TeamIdBase => _teamId;
 
     public float CaptureLevel => _captureLevel;
 
-    [SerializeField] private List<Vehicle> _allVehicles = new List<Vehicle>();
+    private List<Vehicle> _allVehicles = new List<Vehicle>();
 
+    private bool _isCaptureBase;
     private void OnTriggerEnter(Collider other)
     {
        Vehicle v = other.transform.root.GetComponent<Vehicle>();
@@ -28,6 +32,7 @@ public class TeamBase : MonoBehaviour
         v.HitPointChanged += OnHitPointChange;
 
         _allVehicles.Add(v);
+        CaptureBaseAlarm();
     }
 
     private void OnTriggerExit(Collider other)
@@ -35,7 +40,6 @@ public class TeamBase : MonoBehaviour
         Vehicle v = other.transform.root.GetComponent<Vehicle>();
 
         if (v == null) return;
-
 
         v.HitPointChanged -= OnHitPointChange;
         _allVehicles.Remove(v);
@@ -76,8 +80,7 @@ public class TeamBase : MonoBehaviour
                 _allVehicles[i].HitPointChanged -= OnHitPointChange;
             }
         }
-
-
+        NoCaptureBaseAlarm();
         _allVehicles.Clear();
     }
 
@@ -86,5 +89,25 @@ public class TeamBase : MonoBehaviour
         _captureLevel = 0;
     }
 
+    private void CaptureBaseAlarm()
+    {
+        if (_isCaptureBase == true) return;
 
+        else
+        {
+            _isCaptureBase = true;
+            CaptureBase?.Invoke(_isCaptureBase, _teamId);
+        }      
+    }
+
+    private void NoCaptureBaseAlarm()
+    {
+        if (_isCaptureBase == false) return;
+
+        else
+        {
+            _isCaptureBase = false;
+            CaptureBase?.Invoke(_isCaptureBase, _teamId);
+        }
+    }
 }

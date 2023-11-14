@@ -80,9 +80,9 @@ public class ProjectileHit : MonoBehaviour
         float projectilePenetration = _projectile.Properties.GetSpreadArmorPenetration();
 
         //Visual angles for debug
-        Debug.DrawRay(_raycastHit.point, -_projectile.transform.forward, Color.red);
+/*        Debug.DrawRay(_raycastHit.point, -_projectile.transform.forward, Color.red);
         Debug.DrawRay(_raycastHit.point, _raycastHit.normal, Color.green);
-        Debug.DrawRay(_raycastHit.point, _projectile.transform.right, Color.yellow);
+        Debug.DrawRay(_raycastHit.point, _projectile.transform.right, Color.yellow);*/
 
         if (angle > _projectile.Properties.RicochetAngle && _projectile.Properties.Caliber < _hitArmor.Thickness * 3 && _hitArmor.Type == ArmorType.Vehicle)
             hitResult.type = ProjectileHitType.Ricochet;
@@ -93,8 +93,6 @@ public class ProjectileHit : MonoBehaviour
             hitResult.damage = _projectile.Properties.GetSpreadDamage();
         }
             
-
-
         else if (projectilePenetration < reducedArmor)
         {
             hitResult.type = ProjectileHitType.NoPenetration;
@@ -103,13 +101,7 @@ public class ProjectileHit : MonoBehaviour
                 float dmg = _projectile.Properties.GetSpreadDamage();
                 hitResult.damage = dmg / 2;
             }
-
         }
-/*            
-        if(hitResult.type == ProjectileHitType.Penetration)
-            hitResult.damage = _projectile.Properties.GetSpreadDamage();
-        else
-            hitResult.damage = 0;*/
 
         if (_hitArmor.Type == ArmorType.Module)
         {
@@ -122,9 +114,8 @@ public class ProjectileHit : MonoBehaviour
 
         hitResult.point = _raycastHit.point;
         
-
         //For debug result hit
-        Debug.Log($"armor: {_hitArmor.Thickness}, reducedArmor: {reducedArmor}, angle: {angle}, norm: {normalization}, penetation: {projectilePenetration}, resultType: {hitResult.type}");
+        //Debug.Log($"armor: {_hitArmor.Thickness}, reducedArmor: {reducedArmor}, angle: {angle}, norm: {normalization}, penetation: {projectilePenetration}, resultType: {hitResult.type}");
 
         return hitResult;
     }

@@ -1,4 +1,3 @@
-using UnityEngine;
 using Mirror;
 using UnityEngine.Events;
 
@@ -37,6 +36,7 @@ public static class MatchMemberDataExtention
 public class MatchMember : NetworkBehaviour
 {
     public static event UnityAction<MatchMember, int> ChangeFrags;
+    public static event UnityAction<MatchMember> DestroyMember;
 
     public Vehicle activeVehicle { get; set; }
 
@@ -52,6 +52,15 @@ public class MatchMember : NetworkBehaviour
     }
 
 
+    #endregion
+
+    #region DestroyMember
+
+    [Server]
+    public void SvDestroyMember()
+    {
+        DestroyMember?.Invoke(this);
+    }
     #endregion
 
     #region Frags

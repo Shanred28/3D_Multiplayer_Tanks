@@ -10,7 +10,7 @@ public class MatchMemberList : NetworkBehaviour
     public static MatchMemberList Instance;
     public static UnityAction<List<MatchMemberData>> UpdateMemberList;
     [SerializeField] private List<MatchMemberData> _allMemberData = new List<MatchMemberData>();
-    public int  MeemberDataCount => _allMemberData.Count;
+    public int  MemberDataCount => _allMemberData.Count;
 
     private void Awake()
     {
@@ -26,7 +26,6 @@ public class MatchMemberList : NetworkBehaviour
     [Server]
     public void SvAddPlayer(MatchMemberData playerData )
     {
-       // MatchMemberData data = new MatchMemberData(playerData.Id, playerData.Nickname, playerData.TeamId);
         _allMemberData.Add(playerData);
 
          RpcClearPlayerDataList();
@@ -61,7 +60,7 @@ public class MatchMemberList : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void RpcAddPlayer(MatchMemberData memberData/*int userId, string userNickName, int teamId*/)
+    private void RpcAddPlayer(MatchMemberData memberData)
     {
         if (isClient == true && isServer == true)
         {
@@ -69,7 +68,6 @@ public class MatchMemberList : NetworkBehaviour
             return;
         }
 
-        //MatchMemberData data = new MatchMemberData(userId, userNickName, teamId);
         _allMemberData.Add(memberData);
         UpdateMemberList?.Invoke(_allMemberData);
     }
