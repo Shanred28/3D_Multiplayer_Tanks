@@ -6,6 +6,7 @@ public enum AIBehaviourType
     Patrol,
     Support,
     InvaderBase,
+    RushBase,
     DefendBase
 }
 
@@ -17,7 +18,9 @@ public class AITank : NetworkBehaviour
     [SerializeField] private float _supportChance;
     [Range(0, 1)]
     [SerializeField] private float _invaderChance;
-
+/*    [Range(0, 1)]
+    [SerializeField] private float _rushBase;
+*/
     [SerializeField] private Vehicle _vehicle;
     [SerializeField] private AIMovement _movement;
     [SerializeField] private AIShooter _shooter;
@@ -91,11 +94,16 @@ public class AITank : NetworkBehaviour
             return;
         }
 
-        if (chance >= _patrolChance + _supportChance && chance <= _patrolChance + _supportChance + _invaderChance)
+        if (chance >= _patrolChance + _supportChance  && chance <= _patrolChance + _supportChance + _invaderChance)
         {
             StartBehaviour(AIBehaviourType.InvaderBase);
             return;
         }
+/*        if (chance >= _patrolChance + _supportChance + _invaderChance && chance <= _patrolChance + _supportChance + _invaderChance + _rushBase)
+        {
+            StartBehaviour(AIBehaviourType.RushBase);
+            return;
+        }*/
     }
 
     private void CalcTeamMember()
@@ -137,7 +145,12 @@ public class AITank : NetworkBehaviour
         {
             _movementTarget = AIPath.Instance.GetRandomFirePoint(_vehicle.TeamId);
         }
-     
+
+/*        if (_behaviourType == AIBehaviourType.RushBase)
+        {
+            _movementTarget = AIPath.Instance.GetRandomFirePoint(_vehicle.TeamId);
+        }*/
+
         _movement.ResetPath();
     }
     private void OnCaptureBase(bool isCapture, int teamId)
@@ -146,6 +159,11 @@ public class AITank : NetworkBehaviour
 
         print("Евент захват базы");
         _isCaptureTeamBase = isCapture;
+        if (_isCaptureTeamBase == false)
+        {
+            _defBaseTank = 0;
+            SetStartBehaviour();
+        }
     }
     private void OnReachedDistination()
     {
@@ -177,7 +195,7 @@ public class AITank : NetworkBehaviour
         //TODO
         //_shooter.FindTarget();
 
-        if (_isCaptureTeamBase == true && _defBaseTank <= 2)
+        if (_isCaptureTeamBase == true)
         {
             OnDefendBase();
             return;
@@ -197,34 +215,44 @@ public class AITank : NetworkBehaviour
 
     private void OnDefendBase()
     {
-        if (_defBaseTank < 3)
-        {
-            print("Выбор защитников");
-            Vehicle[] v = FindObjectsOfType<Vehicle>();
-
-            float minDist = float.MaxValue;
-            for (int i = 0; i < v.Length; i++)
-            {
-                if (v[i].TeamId == _vehicle.TeamId && v[i].GetComponent<AITank>().behaviourType != AIBehaviourType.DefendBase)
-                {
-                    float dist = Vector3.Distance(_teamBase.transform.position, v[i].transform.position);
-                    if (minDist < dist)
+        /*        if (_defBaseTank < 3)
+                {*/
+        /* print("Выбор защитников");
+         Vehicle[] v = FindObjectsOfType<Vehicle>();*/
+        /*
+                    float minDist = float.MaxValue;
+                    for (int i = 0; i < v.Length; i++)
                     {
-                        minDist = dist;
-                    }
-                }
-            }
-            float dist2 = Vector3.Distance(_teamBase.transform.position, transform.position);
-            if (dist2 > minDist && _defBaseTank > 2) return;
-            else
+                        if (v[i].TeamId == _vehicle.TeamId && v[i].GetComponent<AITank>().behaviourType != AIBehaviourType.DefendBase)
+                        {
+                            float dist = Vector3.Distance(_teamBase.transform.position, v[i].transform.position);
+                            if (minDist < dist)
+                            {
+                                minDist = dist;
+                            }
+                        }
+                    }*/
+
+        /*            float dist2 = Vector3.Distance(_teamBase.transform.position, transform.position);
+                    if (dist2 > minDist && _defBaseTank > 2) return;
+                    else
+                    {
+                        print("назначения защитников");
+                        _defBaseTank++;
+                        _behaviourType = AIBehaviourType.DefendBase;
+                        _movementTarget = _teamBase.transform.position;
+                        _movement.SetDestination(_movementTarget);
+                    }*/
+        if (_behaviourType == AIBehaviourType.DefendBase) return;
+            if (Vector3.Distance(transform.position, _teamBase.transform.position) <= 250.0f)
             {
+            _defBaseTank++;
                 print("назначения защитников");
-                _defBaseTank++;
                 _behaviourType = AIBehaviourType.DefendBase;
                 _movementTarget = _teamBase.transform.position;
                 _movement.SetDestination(_movementTarget);
             }
-        }
+        //}
     }
     #endregion
 }

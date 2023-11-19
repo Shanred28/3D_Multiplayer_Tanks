@@ -43,6 +43,7 @@ public class TeamBase : MonoBehaviour
 
         v.HitPointChanged -= OnHitPointChange;
         _allVehicles.Remove(v);
+        NoCaptureBaseAlarm();
     }
 
     private void Update()

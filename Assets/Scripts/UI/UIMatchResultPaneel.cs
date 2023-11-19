@@ -10,6 +10,7 @@ public class UIMatchResultPaneel : MonoBehaviour
     {
         NetworkSessionManager.Match.MatchStart += OnMatchStart;
         NetworkSessionManager.Match.MatchEnd += OnMatchEnd;
+        _resultPanel.SetActive(false);
     }
 
     private void OnDestroy()

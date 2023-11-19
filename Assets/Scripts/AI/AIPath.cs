@@ -13,6 +13,7 @@ public class AIPath : MonoBehaviour
     [SerializeField] private Transform[] _fireBluePoint;
 
     [SerializeField] private Transform[] _patrolPoint;
+    [SerializeField] private Transform[] _rushBase;
 
     private void Awake()
     {
@@ -63,16 +64,5 @@ public class AIPath : MonoBehaviour
         }
 
         return null;
-
-/*        if (teamId == _teamBase.TeamIdBase
-        {
-            if()
-        }
-
-        if (teamId == TeamSide.TeamBlue)
-        {
-            return _baseBluePoint.position;
-        }
-        return Vector3.zero;*/
     }
 }
